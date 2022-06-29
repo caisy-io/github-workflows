@@ -1,8 +1,5 @@
-         
 on:
-  push:
-    branches:
-      - dev
+  workflow_call:
 
 name: build and deploy to azure dev
 
