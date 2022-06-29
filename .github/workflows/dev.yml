@@ -1,6 +1,6 @@
 on:
   workflow_call:
-
+  
 name: build and deploy to azure dev
 
 # Environment variables available to all jobs and steps in this workflow
