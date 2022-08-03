@@ -1,0 +1,13 @@
+on:
+  workflow_call:
+  
+name: build and deploy to google dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Hello
+      if: github.ref == 'refs/heads/dev'
+      run: |
+        echo "hello from google dev" 

@@ -1,0 +1,13 @@
+on:
+  workflow_call:
+  
+name: global workflow for caisy
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: google dev
+      if: github.ref == 'refs/heads/dev'
+      uses: ./.github/workflows/google_dev
+      
