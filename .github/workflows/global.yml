@@ -4,9 +4,7 @@ on:
 name: global workflow for caisy
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - name: google dev
-      if: github.ref == 'refs/heads/dev'
-      uses: caisy-io/github-workflows/.github/workflows/google_dev.yml@main
+  google:
+    uses: caisy-io/github-workflows/.github/workflows/google_dev.yml@main
+  azure:
+    uses: caisy-io/github-workflows/.github/workflows/azure_dev.yml@main

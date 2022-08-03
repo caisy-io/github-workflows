@@ -3,62 +3,11 @@ on:
   
 name: build and deploy to azure dev
 
-# Environment variables available to all jobs and steps in this workflow
-env:
-  REGISTRY_NAME: "caisyregdev" 
-  CLUSTER_NAME: "caisy-dev"
-  CLUSTER_RESOURCE_GROUP: "caisy-dev"
-  SECRET: "gcrkey"
-  APP_NAME: ${{ github.event.repository.name }}
-  AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS_DEV }}
-  REGISTRY_PASSWORD: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
-  CI_PROJECT_NAME: ${{ github.event.repository.name }}
-  
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@main
-    # Connect to Azure Container Registry (ACR)
-    - uses: azure/docker-login@v1
-      with:
-        login-server: ${{ env.REGISTRY_NAME }}.azurecr.io
-        username: ${{ env.REGISTRY_NAME }} 
-        password: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
-    
-    # Container build and push to a Azure Container Registry (ACR)
-    - run: |
-        docker build . -t ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
-        docker push ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
-    
-    # Set the target Azure Kubernetes Service (AKS) cluster. 
-    - uses: azure/k8s-set-context@v2
-      with:
-        method: kubeconfig
-        kubeconfig: ${{ secrets.AZURE_CREDENTIALS_DEV }}
-    
-    - uses: azure/k8s-create-secret@v1
-      with:
-        container-registry-url: ${{ env.REGISTRY_NAME }}.azurecr.io
-        container-registry-username: ${{ env.REGISTRY_NAME }}
-        container-registry-password: ${{ env.REGISTRY_PASSWORD }}
-        secret-name: ${{ env.SECRET }}
-        namespace: default
-        arguments: --force true
-    - name: Apply kubectl dev
+    - name: Hello
       if: github.ref == 'refs/heads/dev'
-      env:
-        DATABASE_URL: ${{ secrets.AZURE_DATABASE_URL_DEV }}
-        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-        CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-        CENV: dev
-        IMAGE: ${{ env.REGISTRY_NAME }}.azurecr.io/${{ env.APP_NAME }}:${{ github.sha }}
       run: |
-        echo "IMAGE=$IMAGE" && \
-        echo "DATABASE_URL=$DATABASE_URL" && \
-        envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
-        envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
-        envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
-        kubectl apply -f /tmp/deployment.yaml && \
-        kubectl apply -f /tmp/service.yaml && \
-        kubectl apply -f /tmp/autoscaler.yaml && \
+        echo "hello from azure dev" 
