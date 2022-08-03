@@ -9,5 +9,4 @@ jobs:
     steps:
     - name: google dev
       if: github.ref == 'refs/heads/dev'
-      uses: ./.github/workflows/google_dev
-      
+      uses: caisy-io/github-workflows/.github/workflows/google_dev.yml@main
