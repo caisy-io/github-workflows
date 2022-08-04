@@ -41,7 +41,7 @@ jobs:
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
-              echo "AZURE_CREDENTIALS=$(AZURE_CREDENTIALS_DEV | tr -d '\012\015')" >> "$GITHUB_ENV"
+              echo "AZURE_CREDENTIALS=$($AZURE_CREDENTIALS_DEV | tr -d '\012\015')" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_DEV" >> "$GITHUB_ENV"
           else 
