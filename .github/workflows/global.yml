@@ -28,7 +28,9 @@ jobs:
           AZURE_REGISTRY_PASSWORD_DEV: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
           AZURE_REGISTRY_PASSWORD_STAGING: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
           AZURE_REGISTRY_PASSWORD_PROD: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
+          INPUT_ENV: ${{ inputs.environment }}
         run: |
+          echo "input env: $INPUT_ENV"
           if [[ $GITHUB_REF == 'refs/heads/prod' ]]; then
               echo "using prod environment"
               echo "CENV=prod" >> "$GITHUB_ENV"
