@@ -17,9 +17,6 @@ jobs:
           AZURE_DATABASE_URL_DEV: ${{ secrets.AZURE_DATABASE_URL_DEV }}
           AZURE_DATABASE_URL_STAGING: ${{ secrets.AZURE_DATABASE_URL_STAGING }}
           AZURE_DATABASE_URL_PROD: ${{ secrets.AZURE_DATABASE_URL_PROD }}
-          AZURE_CREDENTIALS_DEV: ${{ secrets.AZURE_CREDENTIALS_DEV }}
-          AZURE_CREDENTIALS_STAGING: ${{ secrets.AZURE_CREDENTIALS_DEV }}
-          AZURE_CREDENTIALS_PROD: ${{ secrets.AZURE_CREDENTIALS_DEV }}
           AZURE_REGISTRY_PASSWORD_DEV: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
           AZURE_REGISTRY_PASSWORD_STAGING: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
           AZURE_REGISTRY_PASSWORD_PROD: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
@@ -29,19 +26,16 @@ jobs:
           if [[ $GITHUB_REF == 'refs/heads/prod' || $INPUT_ENV == "prod" ]]; then
               echo "using prod environment"
               echo "CENV=prod" >> "$GITHUB_ENV"
-              echo "AZURE_CREDENTIALS=$AZURE_CREDENTIALS_PROD" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_PROD" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_PROD" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/staging' || $INPUT_ENV == "staging" ]]; then
               echo "using staging environment"
               echo "CENV=staging" >> "$GITHUB_ENV"
-              echo "AZURE_CREDENTIALS=$AZURE_CREDENTIALS_STAGING" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_STAGING" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_STAGING" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
-              echo "AZURE_CREDENTIALS=$($AZURE_CREDENTIALS_DEV | tr -d '\012\015')" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_DEV" >> "$GITHUB_ENV"
           else 
@@ -57,10 +51,22 @@ jobs:
       #     docker build . -t caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
       #     docker push caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
 
+      # doing this manually because the above doesn't work for multiple line env vars and azure cred is multi line
       - uses: azure/k8s-set-context@v2
+        if: ${{ github.ref == 'refs/heads/dev' || env.INPUT_ENV == 'dev' }}
         with:
           method: kubeconfig
-          kubeconfig: ${{ secrets.AZURE_CREDENTIALS }}
+          kubeconfig: ${{ secrets.AZURE_CREDENTIALS_DEV }}
+      - uses: azure/k8s-set-context@v2
+        if: ${{ github.ref == 'refs/heads/staging' || env.INPUT_ENV == 'staging' }}
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.AZURE_CREDENTIALS_STAGING }}
+      - uses: azure/k8s-set-context@v2
+        if: ${{ github.ref == 'refs/heads/prod' || env.INPUT_ENV == 'prod' }}
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.AZURE_CREDENTIALS_PROD }}
 
       - uses: azure/k8s-create-secret@v1
         with:
