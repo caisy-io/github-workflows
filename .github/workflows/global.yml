@@ -12,6 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        name: target checkout
+        if: github.event.client_payload.environment
+        with:
+          ref: ${{ github.event.client_payload.environment }}
+      - uses: actions/checkout@v2
+        name: normal checkout
+        if: ${{ !github.event.client_payload.environment }}
       - name: Set environment for branch
         env:
           AZURE_DATABASE_URL_DEV: ${{ secrets.AZURE_DATABASE_URL_DEV }}
