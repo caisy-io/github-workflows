@@ -1,5 +1,10 @@
 on:
   workflow_call:
+    inputs:
+      environment:
+        type: string
+        description: 'Environment to use for the deployment (prod, staging, dev)'
+        required: false
 
 name: global workflow for caisy
 
