@@ -52,16 +52,19 @@ jobs:
       # doing this manually because the above doesn't work for multiple line env vars and azure cred is multi line
       - uses: azure/k8s-set-context@v2
         if: ${{ github.ref == 'refs/heads/dev' || env.INPUT_ENV == 'dev' }}
+        name: set k8s context dev
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.AZURE_CREDENTIALS_DEV }}
       - uses: azure/k8s-set-context@v2
         if: ${{ github.ref == 'refs/heads/staging' || env.INPUT_ENV == 'staging' }}
+        name: set k8s context staging
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.AZURE_CREDENTIALS_STAGING }}
       - uses: azure/k8s-set-context@v2
         if: ${{ github.ref == 'refs/heads/prod' || env.INPUT_ENV == 'prod' }}
+        name: set k8s context prod
         with:
           method: kubeconfig
           kubeconfig: ${{ secrets.AZURE_CREDENTIALS_PROD }}
