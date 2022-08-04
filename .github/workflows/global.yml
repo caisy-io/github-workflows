@@ -35,18 +35,18 @@ jobs:
               echo "using prod environment"
               echo "CENV=prod" >> "$GITHUB_ENV"
               echo "AZURE_CREDENTIALS=$AZURE_CREDENTIALS_PROD" >> "$GITHUB_ENV"
-              echo "AZURE_REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_PROD" >> "$GITHUB_ENV"
+              echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_PROD" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_PROD" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/staging' ]]; then
               echo "using staging environment"
               echo "CENV=staging" >> "$GITHUB_ENV"
               echo "AZURE_CREDENTIALS=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
-              echo "AZURE_REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_STAGING" >> "$GITHUB_ENV"
+              echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_STAGING" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_STAGING" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/dev' ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
-              echo "AZURE_REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
+              echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_DEV" >> "$GITHUB_ENV"
           else 
               echo "branch not target of the deployment: $GITHUB_REF"
