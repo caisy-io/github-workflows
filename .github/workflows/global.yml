@@ -75,14 +75,14 @@ jobs:
           method: kubeconfig
           kubeconfig: ${{ secrets.AZURE_CREDENTIALS_PROD }}
 
-      # - uses: azure/k8s-create-secret@v1
-      #   with:
-      #     container-registry-url: caisyreg${{ env.CENV }}.azurecr.io
-      #     container-registry-username: caisyreg${{ env.CENV }}
-      #     container-registry-password: ${{ env.REGISTRY_PASSWORD }}
-      #     secret-name: "gcrkey"
-      #     namespace: default
-      #     arguments: --force true
+      - uses: azure/k8s-create-secret@v1
+        with:
+          container-registry-url: caisyreg${{ env.CENV }}.azurecr.io
+          container-registry-username: caisyreg${{ env.CENV }}
+          container-registry-password: ${{ env.REGISTRY_PASSWORD }}
+          secret-name: "gcrkey"
+          namespace: default
+          arguments: --force true
 
       - name: Apply kubectl
         env:
