@@ -41,16 +41,14 @@ jobs:
           else 
               echo "branch not target of the deployment: $GITHUB_REF"
           fi
-      # - uses: azure/docker-login@v1
-      #   with:
-      #     login-server: caisyreg${{ env.CENV }}.azurecr.io
-      #     username: caisyreg${{ env.CENV }}
-      #     password: ${{ env.REGISTRY_PASSWORD }}
-
-      # - run: |
-      #     docker build . -t caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-      #     docker push caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-
+      - uses: azure/docker-login@v1
+        with:
+          login-server: caisyreg${{ env.CENV }}.azurecr.io
+          username: caisyreg${{ env.CENV }}
+          password: ${{ env.REGISTRY_PASSWORD }}
+      - run: |
+          docker build . -t caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+          docker push caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
       # doing this manually because the above doesn't work for multiple line env vars and azure cred is multi line
       - uses: azure/k8s-set-context@v2
         if: ${{ github.ref == 'refs/heads/dev' || env.INPUT_ENV == 'dev' }}
@@ -77,15 +75,15 @@ jobs:
           namespace: default
           arguments: --force true
 
-      # - name: Apply kubectl
-      #   env:
-      #     DATABASE_URL: ${{ env.DATABASE_URL }}
-      #     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-      #     CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-      #     CENV: ${{ env.CENV }}
-      #     IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-      #   run: |
-      #     mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
+      - name: Apply kubectl
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+          CENV: ${{ env.CENV }}
+          IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+        run: |
+          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
   # google:
   #   runs-on: ubuntu-latest
