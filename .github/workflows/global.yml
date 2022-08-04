@@ -30,16 +30,19 @@ jobs:
           AZURE_REGISTRY_PASSWORD_PROD: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
         run: |
           if [[ $GITHUB_REF == 'refs/heads/prod' ]]; then
+              echo "using prod environment"
               echo "CENV=prod" >> "$GITHUB_ENV"
               echo "AZURE_CREDENTIALS=$AZURE_CREDENTIALS_PROD" >> "$GITHUB_ENV"
               echo "AZURE_REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_PROD" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_PROD" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/staging' ]]; then
+              echo "using staging environment"
               echo "CENV=staging" >> "$GITHUB_ENV"
               echo "AZURE_CREDENTIALS=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
               echo "AZURE_REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_STAGING" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_STAGING" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/dev' ]]; then
+              echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
               echo "AZURE_CREDENTIALS=$AZURE_CREDENTIALS_DEV" >> "$GITHUB_ENV"
               echo "AZURE_REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
@@ -81,212 +84,212 @@ jobs:
         run: |
           mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
-  google:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
+  # google:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  #       with:
+  #         fetch-depth: 2
 
-      - name: check modified files
-        id: check_files
-        run: |
-          echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
-      # run: |
-      #   echo "=============== list modified files ==============="
-      #   git diff --name-only HEAD^ HEAD
+  #     - name: check modified files
+  #       id: check_files
+  #       run: |
+  #         echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+  #     # run: |
+  #     #   echo "=============== list modified files ==============="
+  #     #   git diff --name-only HEAD^ HEAD
 
-      #   echo "========== check paths of modified files =========="
-      #   git diff --name-only HEAD^ HEAD > files.txt
-      #   while IFS= read -r file
-      #   do
-      #     echo $file
-      #     if [[ $file = src/* ]]; then
-      #       echo "This modified file is under the 'src' folder."
-      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
-      #       break
-      #     elif [[ $file = Dockerfile ]]; then
-      #       echo "This modified file is the 'Dockerfile' ."
-      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
-      #       break
-      #     elif [[ $file = index.js ]]; then
-      #       echo "This modified file is the 'Dockerfile' ."
-      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
-      #       break
-      #     elif [[ $file = *.go ]]; then
-      #       echo "Gofiles modified."
-      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
-      #       break
-      #     elif [[ $file = *.tsx ]]; then
-      #       echo "tsx modified."
-      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
-      #       break
-      #     elif [[ $file = *.ts ]]; then
-      #       echo "ts modified."
-      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
-      #       break
-      #     elif [[ $file = *.js ]]; then
-      #       echo "js modified."
-      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
-      #       break
-      #     else
-      #       echo "This modified files are not relevant for the docker image using latest."
-      #       echo "::set-output name=docker_tag::latest"
-      #     fi
-      #   done < files.txt
+  #     #   echo "========== check paths of modified files =========="
+  #     #   git diff --name-only HEAD^ HEAD > files.txt
+  #     #   while IFS= read -r file
+  #     #   do
+  #     #     echo $file
+  #     #     if [[ $file = src/* ]]; then
+  #     #       echo "This modified file is under the 'src' folder."
+  #     #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+  #     #       break
+  #     #     elif [[ $file = Dockerfile ]]; then
+  #     #       echo "This modified file is the 'Dockerfile' ."
+  #     #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+  #     #       break
+  #     #     elif [[ $file = index.js ]]; then
+  #     #       echo "This modified file is the 'Dockerfile' ."
+  #     #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+  #     #       break
+  #     #     elif [[ $file = *.go ]]; then
+  #     #       echo "Gofiles modified."
+  #     #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+  #     #       break
+  #     #     elif [[ $file = *.tsx ]]; then
+  #     #       echo "tsx modified."
+  #     #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+  #     #       break
+  #     #     elif [[ $file = *.ts ]]; then
+  #     #       echo "ts modified."
+  #     #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+  #     #       break
+  #     #     elif [[ $file = *.js ]]; then
+  #     #       echo "js modified."
+  #     #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+  #     #       break
+  #     #     else
+  #     #       echo "This modified files are not relevant for the docker image using latest."
+  #     #       echo "::set-output name=docker_tag::latest"
+  #     #     fi
+  #     #   done < files.txt
 
-      - name: Extract logs
-        shell: bash
-        run: echo "docker_tag == ${{steps.check_files.outputs.docker_tag}}"
-        id: logs
+  #     - name: Extract logs
+  #       shell: bash
+  #       run: echo "docker_tag == ${{steps.check_files.outputs.docker_tag}}"
+  #       id: logs
 
-      # Setup gcloud CLI
-      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
-        if: github.ref == 'refs/heads/dev'
-        with:
-          service_account_key: ${{ secrets.gcp_credentials_dev }}
+  #     # Setup gcloud CLI
+  #     - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
+  #       if: github.ref == 'refs/heads/dev'
+  #       with:
+  #         service_account_key: ${{ secrets.gcp_credentials_dev }}
 
-      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
-        if: github.ref == 'refs/heads/staging'
-        with:
-          service_account_key: ${{ secrets.gcp_credentials_staging }}
+  #     - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
+  #       if: github.ref == 'refs/heads/staging'
+  #       with:
+  #         service_account_key: ${{ secrets.gcp_credentials_staging }}
 
-      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
-        if: github.ref == 'refs/heads/prod'
-        with:
-          service_account_key: ${{ secrets.gcp_credentials_prod }}
+  #     - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
+  #       if: github.ref == 'refs/heads/prod'
+  #       with:
+  #         service_account_key: ${{ secrets.gcp_credentials_prod }}
 
-      # Configure docker to use the gcloud command-line tool as a credential helper
-      - run: |-
-          gcloud --quiet auth configure-docker
-        if: steps.check_files.outputs.docker_tag != 'latest'
+  #     # Configure docker to use the gcloud command-line tool as a credential helper
+  #     - run: |-
+  #         gcloud --quiet auth configure-docker
+  #       if: steps.check_files.outputs.docker_tag != 'latest'
 
-      # Build the Docker image
-      - name: Setup Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v1
-        if: steps.check_files.outputs.docker_tag != 'latest'
+  #     # Build the Docker image
+  #     - name: Setup Docker Buildx
+  #       id: buildx
+  #       uses: docker/setup-buildx-action@v1
+  #       if: steps.check_files.outputs.docker_tag != 'latest'
 
-      - name: Build and Push Docker Image dev
-        id: docker_build_dev
-        uses: docker/build-push-action@v2
-        if: github.ref == 'refs/heads/dev' && steps.check_files.outputs.docker_tag != 'latest'
-        with:
-          context: ./
-          file: ./Dockerfile
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: |
-            gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}:${{steps.check_files.outputs.docker_tag}}
-            gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}:latest
-          cache-from: type=registry,ref=gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}:latest
-          cache-to: type=inline
+  #     - name: Build and Push Docker Image dev
+  #       id: docker_build_dev
+  #       uses: docker/build-push-action@v2
+  #       if: github.ref == 'refs/heads/dev' && steps.check_files.outputs.docker_tag != 'latest'
+  #       with:
+  #         context: ./
+  #         file: ./Dockerfile
+  #         builder: ${{ steps.buildx.outputs.name }}
+  #         push: true
+  #         tags: |
+  #           gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}:${{steps.check_files.outputs.docker_tag}}
+  #           gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}:latest
+  #         cache-from: type=registry,ref=gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}:latest
+  #         cache-to: type=inline
 
-      - name: Build and Push Docker Image staging
-        id: docker_build_staging
-        uses: docker/build-push-action@v2
-        if: github.ref == 'refs/heads/staging' && steps.check_files.outputs.docker_tag != 'latest'
-        with:
-          context: ./
-          file: ./Dockerfile
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: |
-            gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
-            gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:latest
-          cache-from: type=registry,ref=gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:latest
-          cache-to: type=inline
+  #     - name: Build and Push Docker Image staging
+  #       id: docker_build_staging
+  #       uses: docker/build-push-action@v2
+  #       if: github.ref == 'refs/heads/staging' && steps.check_files.outputs.docker_tag != 'latest'
+  #       with:
+  #         context: ./
+  #         file: ./Dockerfile
+  #         builder: ${{ steps.buildx.outputs.name }}
+  #         push: true
+  #         tags: |
+  #           gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
+  #           gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:latest
+  #         cache-from: type=registry,ref=gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:latest
+  #         cache-to: type=inline
 
-      - name: Build and Push Docker Image prod
-        id: docker_build_prod
-        uses: docker/build-push-action@v2
-        if: github.ref == 'refs/heads/prod' && steps.check_files.outputs.docker_tag != 'latest'
-        env:
-          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-        with:
-          context: ./
-          file: ./Dockerfile
-          builder: ${{ steps.buildx.outputs.name }}
-          push: true
-          tags: |
-            gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:${{steps.check_files.outputs.docker_tag}}
-            gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:latest
-          cache-from: type=registry,ref=gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:latest
-          cache-to: type=inline
+  #     - name: Build and Push Docker Image prod
+  #       id: docker_build_prod
+  #       uses: docker/build-push-action@v2
+  #       if: github.ref == 'refs/heads/prod' && steps.check_files.outputs.docker_tag != 'latest'
+  #       env:
+  #         CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+  #       with:
+  #         context: ./
+  #         file: ./Dockerfile
+  #         builder: ${{ steps.buildx.outputs.name }}
+  #         push: true
+  #         tags: |
+  #           gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:${{steps.check_files.outputs.docker_tag}}
+  #           gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:latest
+  #         cache-from: type=registry,ref=gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:latest
+  #         cache-to: type=inline
 
-      - name: Extract branch name
-        shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: extract_branch
+  #     - name: Extract branch name
+  #       shell: bash
+  #       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+  #       id: extract_branch
 
-      - id: get-credentials-dev
-        name: Get k8s Credentials dev
-        if: github.ref == 'refs/heads/dev'
-        uses: google-github-actions/get-gke-credentials@main
-        with:
-          cluster_name: caisy-${{ steps.extract_branch.outputs.branch }}
-          location: europe-west3-b
-          credentials: ${{ secrets.gcp_credentials_dev }}
-      - id: get-credentials-staging
-        name: Get k8s Credentials staging
-        if: github.ref == 'refs/heads/staging'
-        uses: google-github-actions/get-gke-credentials@main
-        with:
-          cluster_name: caisy-${{ steps.extract_branch.outputs.branch }}
-          location: europe-west3-b
-          credentials: ${{ secrets.gcp_credentials_staging }}
-      - id: get-credentials-prod
-        name: Get k8s Credentials prod
-        if: github.ref == 'refs/heads/prod'
-        uses: google-github-actions/get-gke-credentials@main
-        with:
-          cluster_name: caisy-${{ steps.extract_branch.outputs.branch }}
-          location: europe-west3-b
-          credentials: ${{ secrets.gcp_credentials_prod }}
+  #     - id: get-credentials-dev
+  #       name: Get k8s Credentials dev
+  #       if: github.ref == 'refs/heads/dev'
+  #       uses: google-github-actions/get-gke-credentials@main
+  #       with:
+  #         cluster_name: caisy-${{ steps.extract_branch.outputs.branch }}
+  #         location: europe-west3-b
+  #         credentials: ${{ secrets.gcp_credentials_dev }}
+  #     - id: get-credentials-staging
+  #       name: Get k8s Credentials staging
+  #       if: github.ref == 'refs/heads/staging'
+  #       uses: google-github-actions/get-gke-credentials@main
+  #       with:
+  #         cluster_name: caisy-${{ steps.extract_branch.outputs.branch }}
+  #         location: europe-west3-b
+  #         credentials: ${{ secrets.gcp_credentials_staging }}
+  #     - id: get-credentials-prod
+  #       name: Get k8s Credentials prod
+  #       if: github.ref == 'refs/heads/prod'
+  #       uses: google-github-actions/get-gke-credentials@main
+  #       with:
+  #         cluster_name: caisy-${{ steps.extract_branch.outputs.branch }}
+  #         location: europe-west3-b
+  #         credentials: ${{ secrets.gcp_credentials_prod }}
 
-      - name: Apply kubectl dev
-        if: github.ref == 'refs/heads/dev'
-        env:
-          DATABASE_URL: ${{ secrets.database_url_dev }}
-          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-          CENV: dev
-          IMAGE: gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
-        run: |
-          echo "IMAGE=$IMAGE" && \
-          envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
-          envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
-          envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
-          kubectl apply -f /tmp/deployment.yaml && \
-          kubectl apply -f /tmp/service.yaml && \
-          kubectl apply -f /tmp/autoscaler.yaml
+  #     - name: Apply kubectl dev
+  #       if: github.ref == 'refs/heads/dev'
+  #       env:
+  #         DATABASE_URL: ${{ secrets.database_url_dev }}
+  #         CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+  #         CENV: dev
+  #         IMAGE: gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
+  #       run: |
+  #         echo "IMAGE=$IMAGE" && \
+  #         envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
+  #         envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
+  #         envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
+  #         kubectl apply -f /tmp/deployment.yaml && \
+  #         kubectl apply -f /tmp/service.yaml && \
+  #         kubectl apply -f /tmp/autoscaler.yaml
 
-      - name: Apply kubectl staging
-        if: github.ref == 'refs/heads/staging'
-        env:
-          DATABASE_URL: ${{ secrets.database_url_staging }}
-          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-          CENV: staging
-          IMAGE: gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
-        run: |
-          envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
-          envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
-          envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
-          kubectl apply -f /tmp/deployment.yaml && \
-          kubectl apply -f /tmp/service.yaml && \
-          kubectl apply -f /tmp/autoscaler.yaml
+  #     - name: Apply kubectl staging
+  #       if: github.ref == 'refs/heads/staging'
+  #       env:
+  #         DATABASE_URL: ${{ secrets.database_url_staging }}
+  #         CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+  #         CENV: staging
+  #         IMAGE: gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
+  #       run: |
+  #         envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
+  #         envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
+  #         envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
+  #         kubectl apply -f /tmp/deployment.yaml && \
+  #         kubectl apply -f /tmp/service.yaml && \
+  #         kubectl apply -f /tmp/autoscaler.yaml
 
-      - name: Apply kubectl prod
-        if: github.ref == 'refs/heads/prod'
-        env:
-          CENV: prod
-          DATABASE_URL: ${{ secrets.database_url_prod }}
-          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-          IMAGE: gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
-        run: |
-          envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
-          envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
-          envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
-          kubectl apply -f /tmp/deployment.yaml && \
-          kubectl apply -f /tmp/service.yaml && \
-          kubectl apply -f /tmp/autoscaler.yaml
+  #     - name: Apply kubectl prod
+  #       if: github.ref == 'refs/heads/prod'
+  #       env:
+  #         CENV: prod
+  #         DATABASE_URL: ${{ secrets.database_url_prod }}
+  #         CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+  #         IMAGE: gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
+  #       run: |
+  #         envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
+  #         envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
+  #         envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
+  #         kubectl apply -f /tmp/deployment.yaml && \
+  #         kubectl apply -f /tmp/service.yaml && \
+  #         kubectl apply -f /tmp/autoscaler.yaml
