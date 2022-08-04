@@ -9,11 +9,6 @@ env:
 jobs:
   azure:
     if: github.ref == 'refs/heads/dev'
-    env:
-      CENV: "dev"
-      AZURE_CREDENTIALS: ${{ secrets.AZURE_CREDENTIALS_DEV }}
-      REGISTRY_PASSWORD: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
-
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -45,7 +40,6 @@ jobs:
               echo "AZURE_REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_DEV" >> "$GITHUB_ENV"
           fi
-
       - uses: azure/docker-login@v1
         with:
           login-server: caisyreg${{ env.CENV }}.azurecr.io
