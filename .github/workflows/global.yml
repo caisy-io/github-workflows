@@ -196,14 +196,18 @@ jobs:
           cache-from: type=registry,ref=gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:latest
           cache-to: type=inline
 
-      - id: get-credentials-dev
-        name: Get k8s Credentials dev
+      - id: 'auth-dev'
         if: ${{ env.CENV == 'dev' }}
-        uses: google-github-actions/get-gke-credentials@main
+        uses: 'google-github-actions/auth@v0'
         with:
-          cluster_name: caisy-${{ env.CENV }}
-          location: europe-west3-b
-          credentials: ${{ secrets.gcp_credentials_dev }}
+          credentials_json: '${{ secrets.gcp_credentials_dev }}'
+
+      - id: 'get-credentials-dev'
+        if: ${{ env.CENV == 'dev' }}
+        uses: 'google-github-actions/get-gke-credentials@v0'
+        with:
+            cluster_name: caisy-${{ env.CENV }}
+            location: europe-west3-b
 
       - id: get-credentials-staging
         name: Get k8s Credentials staging
