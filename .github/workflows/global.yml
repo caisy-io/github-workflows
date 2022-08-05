@@ -59,9 +59,9 @@ jobs:
           login-server: caisyreg${{ env.CENV }}.azurecr.io
           username: caisyreg${{ env.CENV }}
           password: ${{ env.REGISTRY_PASSWORD }}
-      - run: |
-          docker build . -t caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-          docker push caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+      # - run: |
+      #     docker build . -t caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+      #     docker push caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
       # Build the Docker image
       - name: Setup Docker Buildx
         id: buildx
