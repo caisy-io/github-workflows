@@ -46,6 +46,11 @@ jobs:
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_DEV" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
+              echo "ASSETS_BASE_PATH=https://assets.dev.caisy.eu/assets" >> "$GITHUB_ENV"
+              echo "BUCKET_NAME=caisy-assets-dev" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_APIKEY=AIzaSyC8tftg2VoNpRTMMii17IYZpo5upqjs6fo" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=caisy-dev.firebaseapp.com" >> "$GITHUB_ENV"
+              echo "CORE_URL=https://dev.caisy.eu" >> "$GITHUB_ENV"
           else 
               echo "branch not target of the deployment: $GITHUB_REF"
           fi
@@ -57,6 +62,28 @@ jobs:
       - run: |
           docker build . -t caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
           docker push caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+      # Build the Docker image
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          build-args: |
+            NEXT_PUBLIC_FIRE_APIKEY=${{ env.NEXT_PUBLIC_FIRE_APIKEY }}
+            NEXT_PUBLIC_FIRE_AUTHDOMAIN=${{ env.NEXT_PUBLIC_FIRE_AUTHDOMAIN }}
+            CORE_URL=${{ env.CORE_URL }}
+            NEXT_PUBLIC_SERVICE_NAME=${{ env.CENV }}-caisy-web-app
+          tags: |
+            caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+            caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:latest
+          cache-from: type=registry,ref=caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:latest
+          cache-to: type=inline
       # doing this manually because the above doesn't work for multiple line env vars and azure cred is multi line
       - uses: azure/k8s-set-context@v2
         if: ${{ env.CENV == 'dev' }}
@@ -93,12 +120,15 @@ jobs:
           DATABASE_URL: ${{ env.DATABASE_URL }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+          NEXT_PUBLIC_FIRE_APIKEY: ${{ env.NEXT_PUBLIC_FIRE_APIKEY }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN: ${{ env.NEXT_PUBLIC_FIRE_AUTHDOMAIN }}
+          ASSETS_BASE_PATH: ${{ env.ASSETS_BASE_PATH }}
+          BUCKET_NAME: ${{ env.BUCKET_NAME }}
+          CORE_URL: ${{ env.CORE_URL }}
           CENV: ${{ env.CENV }}
-          ASSETS_BASE_PATH: https://assets.dev.caisy.app/assets
-          BUCKET_NAME: caisy-assets-dev
           IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
         run: |
-          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
+          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
       - name: Apply kubectl staging
         if: ${{ env.CENV == 'staging' }}
@@ -196,18 +226,18 @@ jobs:
           cache-from: type=registry,ref=gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:latest
           cache-to: type=inline
 
-      - id: 'auth-dev'
+      - id: "auth-dev"
         if: ${{ env.CENV == 'dev' }}
-        uses: 'google-github-actions/auth@v0'
+        uses: "google-github-actions/auth@v0"
         with:
-          credentials_json: '${{ secrets.gcp_credentials_dev }}'
+          credentials_json: "${{ secrets.gcp_credentials_dev }}"
 
-      - id: 'get-credentials-dev'
+      - id: "get-credentials-dev"
         if: ${{ env.CENV == 'dev' }}
-        uses: 'google-github-actions/get-gke-credentials@v0'
+        uses: "google-github-actions/get-gke-credentials@v0"
         with:
-            cluster_name: caisy-${{ env.CENV }}
-            location: europe-west3-b
+          cluster_name: caisy-${{ env.CENV }}
+          location: europe-west3-b
 
       - id: get-credentials-staging
         name: Get k8s Credentials staging

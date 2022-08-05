@@ -1,0 +1,196 @@
+name: Build and Deploy
+on:
+  push:
+    branches:
+      - prod
+      - staging
+      - dev
+
+env:
+  GKE_ZONE: europe-west3-b
+  CI_PROJECT_NAME: ${{ github.event.repository.name }}
+
+jobs:
+  check-build-publish-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2
+      - name: Set variables
+        id: envvars
+        run: |
+          if [[ "${{github.base_ref}}" == "prod" || "${{github.ref}}" == "refs/heads/prod" ]]; then
+            echo "::set-output name=cenv::prod"
+            echo "::set-output name=project_id::caisy-io"
+            echo "::set-output name=database_url::${{ secrets.database_url_prod }}"
+            echo "::set-output name=next_public_fire_apikey::AIzaSyBwjKZrrUkOKjfcKT1vbKGcdwcwmmpfGRI"
+            echo "::set-output name=next_public_fire_authdomain::caisy-io.firebaseapp.com"
+            echo "::set-output name=core_url::https://caisy.io"
+            echo "::set-output name=assets_base_path::https://assets.caisy.io/assets"
+          fi
+
+          if [[ "${{github.base_ref}}" == "staging" || "${{github.ref}}" == "refs/heads/staging" ]]; then
+            echo "::set-output name=cenv::staging"
+            echo "::set-output name=project_id::caisy-staging"
+            echo "::set-output name=database_url::${{ secrets.database_url_staging }}"
+            echo "::set-output name=next_public_fire_apikey::AIzaSyDpDhJEFlb9XI9Pg9q-zdS3ShJhTRScoA0"
+            echo "::set-output name=next_public_fire_authdomain::caisy-staging.firebaseapp.com"
+            echo "::set-output name=core_url::https://staging.caisy.io"
+            echo "::set-output name=assets_base_path::https://assets.staging.caisy.io/assets"
+          fi
+
+          if [[ "${{github.base_ref}}" == "dev" || "${{github.ref}}" == "refs/heads/dev" ]]; then
+            echo "::set-output name=cenv::dev"
+            echo "::set-output name=project_id::caisy-dev"
+            echo "::set-output name=database_url::${{ secrets.database_url_dev }}"
+            echo "::set-output name=next_public_fire_apikey::AIzaSyC8tftg2VoNpRTMMii17IYZpo5upqjs6fo"
+            echo "::set-output name=next_public_fire_authdomain::caisy-dev.firebaseapp.com"
+            echo "::set-output name=core_url::https://dev.caisy.io"
+            echo "::set-output name=assets_base_path::https://assets.dev.caisy.io/assets"
+          fi
+
+      - name: check modified files
+        id: check_files
+        run: |
+          echo "::set-output name=docker_tag::${GITHUB_SHA::7}-${{ steps.envvars.outputs.cenv }}"
+      # run: |
+      #   echo "=============== list modified files ==============="
+      #   git diff --name-only HEAD^ HEAD
+
+      #   echo "========== check paths of modified files =========="
+      #   git diff --name-only HEAD^ HEAD > files.txt
+      #   while IFS= read -r file
+      #   do
+      #     echo $file
+      #     if [[ $file = src/* ]]; then
+      #       echo "This modified file is under the 'src' folder."
+      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+      #       break
+      #     elif [[ $file = Dockerfile ]]; then
+      #       echo "This modified file is the 'Dockerfile' ."
+      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+      #       break
+      #     elif [[ $file = index.js ]]; then
+      #       echo "This modified file is the 'Dockerfile' ."
+      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+      #       break
+      #     elif [[ $file = *.go ]]; then
+      #       echo "Gofiles modified."
+      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+      #       break
+      #     elif [[ $file = *.tsx ]]; then
+      #       echo "tsx modified."
+      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+      #       break
+      #     elif [[ $file = *.ts ]]; then
+      #       echo "ts modified."
+      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+      #       break
+      #     elif [[ $file = *.js ]]; then
+      #       echo "js modified."
+      #       echo "::set-output name=docker_tag::${GITHUB_SHA::7}"
+      #       break
+      #     else
+      #       echo "This modified files are not relevant for the docker image using latest."
+      #       echo "::set-output name=docker_tag::latest"
+      #     fi
+      #   done < files.txt
+
+      - name: Extract logs
+        shell: bash
+        run: echo "docker_tag == ${{steps.check_files.outputs.docker_tag}}"
+        id: logs
+
+      # Setup gcloud CLI
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
+        if: github.ref == 'refs/heads/dev'
+        with:
+          service_account_key: ${{ secrets.gcp_credentials_dev }}
+
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
+        if: github.ref == 'refs/heads/staging'
+        with:
+          service_account_key: ${{ secrets.gcp_credentials_staging }}
+
+      - uses: google-github-actions/setup-gcloud@94337306dda8180d967a56932ceb4ddcf01edae7
+        if: github.ref == 'refs/heads/prod'
+        with:
+          service_account_key: ${{ secrets.gcp_credentials_prod }}
+
+      # Configure docker to use the gcloud command-line tool as a credential helper
+      - run: |-
+          gcloud --quiet auth configure-docker
+        if: steps.check_files.outputs.docker_tag != 'latest'
+
+      # Build the Docker image
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        if: steps.check_files.outputs.docker_tag != 'latest'
+
+      - name: Build and Push Docker Image
+        id: docker_build_dev
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          build-args: |
+            NEXT_PUBLIC_FIRE_APIKEY=${{ steps.envvars.outputs.next_public_fire_apikey }}
+            NEXT_PUBLIC_FIRE_AUTHDOMAIN=${{ steps.envvars.outputs.next_public_fire_authdomain }}
+            NEXT_PUBLIC_SERVICE_NAME=${{ steps.envvars.outputs.cenv }}-caisy-ui
+            CORE_URL=${{ steps.envvars.outputs.core_url }}
+            SENTRY_ENVIRONMENT=${{ steps.envvars.outputs.cenv }}-${{steps.check_files.outputs.docker_tag}}
+          tags: |
+            gcr.io/${{ steps.envvars.outputs.project_id }}/${{ env.CI_PROJECT_NAME }}:${{steps.check_files.outputs.docker_tag}}
+            gcr.io/${{ steps.envvars.outputs.project_id }}/${{ env.CI_PROJECT_NAME }}:latest
+          cache-from: type=registry,ref=gcr.io/${{ steps.envvars.outputs.project_id }}/${{ env.CI_PROJECT_NAME }}:latest
+          cache-to: type=inline
+
+      - id: get-credentials-dev
+        name: Get k8s Credentials dev
+        if: github.ref == 'refs/heads/dev'
+        uses: google-github-actions/get-gke-credentials@main
+        with:
+          cluster_name: caisy-${{ steps.envvars.outputs.cenv }}
+          location: europe-west3-b
+          credentials: ${{ secrets.gcp_credentials_dev }}
+      - id: get-credentials-staging
+        name: Get k8s Credentials staging
+        if: github.ref == 'refs/heads/staging'
+        uses: google-github-actions/get-gke-credentials@main
+        with:
+          cluster_name: caisy-${{ steps.envvars.outputs.cenv }}
+          location: europe-west3-b
+          credentials: ${{ secrets.gcp_credentials_staging }}
+      - id: get-credentials-prod
+        name: Get k8s Credentials prod
+        if: github.ref == 'refs/heads/prod'
+        uses: google-github-actions/get-gke-credentials@main
+        with:
+          cluster_name: caisy-${{ steps.envvars.outputs.cenv }}
+          location: europe-west3-b
+          credentials: ${{ secrets.gcp_credentials_prod }}
+
+      - name: Apply kubectl
+        env:
+          NEXT_PUBLIC_FIRE_APIKEY: ${{ steps.envvars.outputs.next_public_fire_apikey }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN: ${{ steps.envvars.outputs.next_public_fire_authdomain }}
+          CORE_URL: ${{ steps.envvars.outputs.core_url }}
+          CENV: ${{ steps.envvars.outputs.cenv }}
+          PROJECT_ID: ${{ steps.envvars.outputs.project_id }}
+          BUCKET_NAME: caisy-assets-${{ steps.envvars.outputs.cenv }}
+          ASSETS_BASE_PATH: ${{ steps.envvars.outputs.assets_base_path }}
+          DATABASE_URL: ${{ steps.envvars.outputs.database_url }}
+          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+          IMAGE: gcr.io/${{ steps.envvars.outputs.project_id }}/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
+        run: |
+          envsubst '${IMAGE} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${PROJECT_ID} ${ASSETS_BASE_PATH} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV} ${BUCKET_NAME}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
+          envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
+          envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
+          kubectl apply -f /tmp/deployment.yaml && \
+          kubectl apply -f /tmp/service.yaml && \
+          kubectl apply -f /tmp/autoscaler.yaml
