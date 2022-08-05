@@ -137,6 +137,7 @@ jobs:
         env:
           DATABASE_URL_DEV: ${{ secrets.DATABASE_URL_DEV }}
           DATABASE_URL_STAGING: ${{ secrets.DATABASE_URL_STAGING }}
+          GOOGLE_APPLICATION_CREDENTIALS_DEV: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_DEV }}
           DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
           INPUT_ENV: ${{ github.event.client_payload.environment }}
         run: |
@@ -152,6 +153,7 @@ jobs:
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
+              echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$DATABASE_URL_DEV" >> "$GITHUB_ENV"
           else 
               echo "branch not target of the deployment: $GITHUB_REF"
@@ -171,7 +173,7 @@ jobs:
         if: ${{ env.CENV == 'prod' }}
         with:
           service_account_key: ${{ secrets.gcp_credentials_prod }}
- 
+
       - run: |-
           gcloud --quiet auth configure-docker
 
@@ -180,7 +182,7 @@ jobs:
         id: buildx
         uses: docker/setup-buildx-action@v1
 
-      - name: Build and Push Docker Image 
+      - name: Build and Push Docker Image
         id: docker_build
         uses: docker/build-push-action@v2
         with:
@@ -189,7 +191,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: |
-            gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{steps.check_files.outputs.docker_tag}}
+            gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
             gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:latest
           cache-from: type=registry,ref=gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:latest
           cache-to: type=inline
@@ -220,21 +222,19 @@ jobs:
           location: europe-west3-b
           credentials: ${{ secrets.gcp_credentials_prod }}
 
-  #     - name: Apply kubectl dev
-  #       if: github.ref == 'refs/heads/dev'
-  #       env:
-  #         DATABASE_URL: ${{ secrets.database_url_dev }}
-  #         CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-  #         CENV: dev
-  #         IMAGE: gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
-  #       run: |
-  #         echo "IMAGE=$IMAGE" && \
-  #         envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
-  #         envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
-  #         envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
-  #         kubectl apply -f /tmp/deployment.yaml && \
-  #         kubectl apply -f /tmp/service.yaml && \
-  #         kubectl apply -f /tmp/autoscaler.yaml
+      # - name: Apply kubectl dev
+      #   if: ${{ env.CENV == 'dev' }}
+      #   env:
+      #     GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+      #     DATABASE_URL: ${{ env.DATABASE_URL }}
+      #     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      #     CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+      #     CENV: ${{ env.CENV }}
+      #     ASSETS_BASE_PATH: https://assets.dev.caisy.app/assets
+      #     BUCKET_NAME: caisy-assets-dev
+      #     IMAGE: gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+      #   run: |
+      #     mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
   #     - name: Apply kubectl staging
   #       if: github.ref == 'refs/heads/staging'
@@ -242,7 +242,7 @@ jobs:
   #         DATABASE_URL: ${{ secrets.database_url_staging }}
   #         CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
   #         CENV: staging
-  #         IMAGE: gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
+  #         IMAGE: gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
   #       run: |
   #         envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
   #         envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
@@ -257,7 +257,7 @@ jobs:
   #         CENV: prod
   #         DATABASE_URL: ${{ secrets.database_url_prod }}
   #         CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-  #         IMAGE: gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:${{ steps.check_files.outputs.docker_tag }}
+  #         IMAGE: gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
   #       run: |
   #         envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
   #         envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
