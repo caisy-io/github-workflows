@@ -24,32 +24,60 @@ jobs:
           AZURE_DATABASE_URL_STAGING: ${{ secrets.AZURE_DATABASE_URL_STAGING }}
           AZURE_DATABASE_URL_PROD: ${{ secrets.AZURE_DATABASE_URL_PROD }}
           GOOGLE_APPLICATION_CREDENTIALS_DEV: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_DEV }}
+          GOOGLE_APPLICATION_CREDENTIALS_STAGING: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_STAGING }}
+          GOOGLE_APPLICATION_CREDENTIALS_PROD: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_PROD }}
+          NEXT_PUBLIC_FIRE_APIKEY_DEV: ${{ secrets.NEXT_PUBLIC_FIRE_APIKEY_DEV }}
+          NEXT_PUBLIC_FIRE_APIKEY_STAGING: ${{ secrets.NEXT_PUBLIC_FIRE_APIKEY_STAGING }}
+          NEXT_PUBLIC_FIRE_APIKEY_PROD: ${{ secrets.NEXT_PUBLIC_FIRE_APIKEY_PROD }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV: ${{ secrets.NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING: ${{ secrets.NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD: ${{ secrets.NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD }}
           AZURE_REGISTRY_PASSWORD_DEV: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
           AZURE_REGISTRY_PASSWORD_STAGING: ${{ secrets.AZURE_REGISTRY_PASSWORD_STAGING }}
           AZURE_REGISTRY_PASSWORD_PROD: ${{ secrets.AZURE_REGISTRY_PASSWORD_PROD }}
           INPUT_ENV: ${{ github.event.client_payload.environment }}
         run: |
+          if test -f "build.sh"; then
+              echo "build.sh exists."
+              echo "HAS_BUILD_SCRIPT=Y" >> "$GITHUB_ENV"
+          fi
+          if test -f "deploy.sh"; then
+              echo "deploy.sh exists."
+              echo "HAS_DEPLOY_SCRIPT=Y" >> "$GITHUB_ENV"
+          fi
           echo "input env: $INPUT_ENV"
           if [[ $GITHUB_REF == 'refs/heads/prod' || $INPUT_ENV == "prod" ]]; then
               echo "using prod environment"
               echo "CENV=prod" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_PROD" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_PROD" >> "$GITHUB_ENV"
+              echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PROD" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_PROD" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD" >> "$GITHUB_ENV"
+              echo "BUCKET_NAME=caisy-assets-prod" >> "$GITHUB_ENV"
+              echo "ASSETS_BASE_PATH=https://assets.caisy.eu/assets" >> "$GITHUB_ENV"
+              echo "CORE_URL=https://caisy.eu" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/staging' || $INPUT_ENV == "staging" ]]; then
               echo "using staging environment"
               echo "CENV=staging" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_STAGING" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_STAGING" >> "$GITHUB_ENV"
+              echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_STAGING" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_STAGING" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING" >> "$GITHUB_ENV"
+              echo "BUCKET_NAME=caisy-assets-staging" >> "$GITHUB_ENV"
+              echo "ASSETS_BASE_PATH=https://assets.staging.caisy.eu/assets" >> "$GITHUB_ENV"
+              echo "CORE_URL=https://staging.caisy.eu" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_DEV" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
-              echo "ASSETS_BASE_PATH=https://assets.dev.caisy.eu/assets" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_DEV" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV" >> "$GITHUB_ENV"
               echo "BUCKET_NAME=caisy-assets-dev" >> "$GITHUB_ENV"
-              echo "NEXT_PUBLIC_FIRE_APIKEY=AIzaSyC8tftg2VoNpRTMMii17IYZpo5upqjs6fo" >> "$GITHUB_ENV"
-              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=caisy-dev.firebaseapp.com" >> "$GITHUB_ENV"
+              echo "ASSETS_BASE_PATH=https://assets.dev.caisy.eu/assets" >> "$GITHUB_ENV"
               echo "CORE_URL=https://dev.caisy.eu" >> "$GITHUB_ENV"
           else 
               echo "branch not target of the deployment: $GITHUB_REF"
@@ -63,11 +91,19 @@ jobs:
       #     docker build . -t caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
       #     docker push caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
       # Build the Docker image
+      - name: custom_build
+        if: ${{ env.HAS_BUILD_SCRIPT == 'Y'}}
+        run: |
+          bash build.sh
+
+      # Build the Docker image
       - name: Setup Docker Buildx
         id: buildx
+        if: ${{ env.HAS_BUILD_SCRIPT != 'Y'}}
         uses: docker/setup-buildx-action@v1
 
       - name: Build and Push Docker Image
+        if: ${{ env.HAS_BUILD_SCRIPT != 'Y'}}
         uses: docker/build-push-action@v2
         with:
           context: ./
@@ -114,7 +150,7 @@ jobs:
           arguments: --force true
 
       - name: Apply kubectl dev
-        if: ${{ env.CENV == 'dev' }}
+        if: ${{ env.HAS_DEPLOY_SCRIPT != 'Y'}}
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
           DATABASE_URL: ${{ env.DATABASE_URL }}
@@ -130,27 +166,43 @@ jobs:
         run: |
           mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
-      - name: Apply kubectl staging
-        if: ${{ env.CENV == 'staging' }}
+      - name: Apply kubectl dev
+        if: ${{ env.HAS_DEPLOY_SCRIPT == 'Y'}}
         env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
           DATABASE_URL: ${{ env.DATABASE_URL }}
           SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
           CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+          NEXT_PUBLIC_FIRE_APIKEY: ${{ env.NEXT_PUBLIC_FIRE_APIKEY }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN: ${{ env.NEXT_PUBLIC_FIRE_AUTHDOMAIN }}
+          ASSETS_BASE_PATH: ${{ env.ASSETS_BASE_PATH }}
+          BUCKET_NAME: ${{ env.BUCKET_NAME }}
+          CORE_URL: ${{ env.CORE_URL }}
           CENV: ${{ env.CENV }}
           IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
         run: |
-          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
+          bash deploy.sh
+      # - name: Apply kubectl staging
+      #   if: ${{ env.CENV == 'staging' }}
+      #   env:
+      #     DATABASE_URL: ${{ env.DATABASE_URL }}
+      #     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      #     CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+      #     CENV: ${{ env.CENV }}
+      #     IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+      #   run: |
+      #     mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
-      - name: Apply kubectl prod
-        if: ${{ env.CENV == 'prod' }}
-        env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
-          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-          CENV: ${{ env.CENV }}
-          IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-        run: |
-          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
+      # - name: Apply kubectl prod
+      #   if: ${{ env.CENV == 'prod' }}
+      #   env:
+      #     DATABASE_URL: ${{ env.DATABASE_URL }}
+      #     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+      #     CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+      #     CENV: ${{ env.CENV }}
+      #     IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+      #   run: |
+      #     mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
   google:
     runs-on: ubuntu-latest
@@ -171,6 +223,14 @@ jobs:
           DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
           INPUT_ENV: ${{ github.event.client_payload.environment }}
         run: |
+          if test -f "build.sh"; then
+              echo "build.sh exists."
+              echo "HAS_BUILD_SCRIPT=Y" >> "$GITHUB_ENV"
+          fi
+          if test -f "deploy.sh"; then
+              echo "deploy.sh exists."
+              echo "HAS_DEPLOY_SCRIPT=Y" >> "$GITHUB_ENV"
+          fi
           echo "input env: $INPUT_ENV"
           if [[ $GITHUB_REF == 'refs/heads/prod' || $INPUT_ENV == "prod" ]]; then
               echo "using prod environment"
@@ -207,13 +267,19 @@ jobs:
       - run: |-
           gcloud --quiet auth configure-docker
 
+      - name: custom_build
+        if: ${{ env.HAS_BUILD_SCRIPT == 'Y'}}
+        run: |
+          bash build.sh
       # Build the Docker image
       - name: Setup Docker Buildx
         id: buildx
+        if: ${{ env.HAS_BUILD_SCRIPT != 'Y'}}
         uses: docker/setup-buildx-action@v1
 
       - name: Build and Push Docker Image
         id: docker_build
+        if: ${{ env.HAS_BUILD_SCRIPT != 'Y'}}
         uses: docker/build-push-action@v2
         with:
           context: ./
