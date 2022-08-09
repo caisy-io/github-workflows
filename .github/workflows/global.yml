@@ -257,6 +257,7 @@ jobs:
 
   google:
     runs-on: ubuntu-latest
+    if: ${{ github.ref != 'refs/heads/dev' && github.event.client_payload.environment != "dev" }}
     steps:
       - uses: actions/checkout@v2
         name: target checkout
