@@ -364,20 +364,23 @@ jobs:
           fi
 
       - id: "auth-dev"
+        if: ${{ env.CENV == 'dev' }}
         uses: "google-github-actions/auth@v0"
         with:
           credentials_json: "${{ secrets.gcp_credentials_dev }}"
 
       - id: "auth-staging"
+        if: ${{ env.CENV == 'staging' }}
         uses: "google-github-actions/auth@v0"
         with:
           credentials_json: "${{ secrets.gcp_credentials_staging }}"
 
       - id: "auth-prod"
+        if: ${{ env.CENV == 'prod' }}
         uses: "google-github-actions/auth@v0"
         with:
           credentials_json: "${{ secrets.gcp_credentials_prod }}"
-          
+
       - run: |-
           gcloud --quiet auth configure-docker
 
