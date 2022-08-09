@@ -410,7 +410,7 @@ jobs:
         uses: "google-github-actions/auth@v0"
         with:
           credentials_json: "${{ secrets.gcp_credentials_dev }}"
-          
+
       - id: "auth-staging"
         uses: "google-github-actions/auth@v0"
         with:
@@ -427,7 +427,7 @@ jobs:
           cluster_name: caisy-${{ env.CENV }}
           location: europe-west3-b
 
-      - name: Apply kubectl
+      - name: Run deploy.sh
         if: ${{ env.HAS_DEPLOY_SCRIPT == 'Y'}}
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
