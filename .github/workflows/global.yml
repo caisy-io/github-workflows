@@ -21,9 +21,9 @@ jobs:
       - name: Set environment for branch
         env:
           GRAFC_PROM_USER_DEV: ${{ secrets.GRAFC_PROM_USER_DEV }}
-          GRAFC_PROM_PWD_DEV: ${{ GRAFC_PROM_PWD_DEV }}
+          GRAFC_PROM_PWD_DEV: ${{ secrets.GRAFC_PROM_PWD_DEV }}
           GRAFC_LOGS_USER_DEV: ${{ secrets.GRAFC_LOGS_USER_DEV }}
-          GRAFC_LOGS_PWD_DEV: ${{ GRAFC_LOGS_PWD_DEV }}
+          GRAFC_LOGS_PWD_DEV: ${{ secrets.GRAFC_LOGS_PWD_DEV }}
           GRAFC_TRACE_USER_DEV: ${{ secrets.GRAFC_TRACE_USER_DEV }}
           GRAFC_TRACE_PWD_DEV: ${{ secrets.GRAFC_TRACE_PWD_DEV }}
           GRAFC_PROM_PWD_STAGING: ${{ secrets.GRAFC_PROM_PWD_STAGING }}
