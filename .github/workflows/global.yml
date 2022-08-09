@@ -198,9 +198,15 @@ jobs:
           BUCKET_NAME: ${{ env.BUCKET_NAME }}
           CORE_URL: ${{ env.CORE_URL }}
           CENV: ${{ env.CENV }}
+          GRAFC_PROM_USER: ${{ env.GRAFC_PROM_USER }}
+          GRAFC_PROM_PWD: ${{ env.GRAFC_PROM_PWD }}
+          GRAFC_LOGS_USER: ${{ env.GRAFC_LOGS_USER }}
+          GRAFC_LOGS_PWD: ${{ env.GRAFC_LOGS_PWD }}
+          GRAFC_TRACE_USER: ${{ env.GRAFC_TRACE_USER }}
+          GRAFC_TRACE_PWD: ${{ env.GRAFC_TRACE_PWD }}
           IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
         run: |
-          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
+          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${IMAGE} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
       - name: Apply kubectl dev
         if: ${{ env.HAS_DEPLOY_SCRIPT == 'Y'}}
