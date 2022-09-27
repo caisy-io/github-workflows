@@ -53,6 +53,9 @@ jobs:
           AZURE_REGISTRY_PASSWORD_DEV: ${{ secrets.AZURE_REGISTRY_PASSWORD_DEV }}
           AZURE_REGISTRY_PASSWORD_STAGING: ${{ secrets.AZURE_REGISTRY_PASSWORD_STAGING }}
           AZURE_REGISTRY_PASSWORD_PROD: ${{ secrets.AZURE_REGISTRY_PASSWORD_PROD }}
+          ELASTICSEARCH_PWD_AZURE_DEV: ${{ secrets.ELASTICSEARCH_PWD_AZURE_DEV }}
+          ELASTICSEARCH_PWD_AZURE_STAGING: ${{ secrets.ELASTICSEARCH_PWD_AZURE_STAGING }}
+          ELASTICSEARCH_PWD_AZURE_PROD: ${{ secrets.ELASTICSEARCH_PWD_AZURE_PROD }}
           INPUT_ENV: ${{ github.event.client_payload.environment }}
         run: |
           echo "TARGET_PLATFORM=AZURE" >> "$GITHUB_ENV"
@@ -69,6 +72,7 @@ jobs:
               echo "using prod environment"
               echo "CENV=prod" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_PROD" >> "$GITHUB_ENV"
+              echo "ELASTICSEARCH_PWD=$ELASTICSEARCH_PWD_AZURE_PROD" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_PROD" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PROD" >> "$GITHUB_ENV"
               echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_PROD" >> "$GITHUB_ENV"
@@ -85,6 +89,7 @@ jobs:
           elif [[ $GITHUB_REF == 'refs/heads/staging' || $INPUT_ENV == "staging" ]]; then
               echo "using staging environment"
               echo "CENV=staging" >> "$GITHUB_ENV"
+              echo "ELASTICSEARCH_PWD=$ELASTICSEARCH_PWD_AZURE_STAGING" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_STAGING" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_STAGING" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_STAGING" >> "$GITHUB_ENV"
@@ -102,6 +107,7 @@ jobs:
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
+              echo "ELASTICSEARCH_PWD=$ELASTICSEARCH_PWD_AZURE_DEV" >> "$GITHUB_ENV"
               echo "REGISTRY_PASSWORD=$AZURE_REGISTRY_PASSWORD_DEV" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$AZURE_DATABASE_URL_DEV" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
@@ -206,11 +212,12 @@ jobs:
           GRAFC_TRACE_USER: ${{ env.GRAFC_TRACE_USER }}
           GRAFC_TRACE_PWD: ${{ env.GRAFC_TRACE_PWD }}
           TARGET_PLATFORM: ${{ env.TARGET_PLATFORM }}
+          ELASTICSEARCH_PWD: ${{ env.ELASTICSEARCH_PWD }}
           LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
           INTERNAL_AUTOMATION_AUTH_TOKEN: ${{ secrets.INTERNAL_AUTOMATION_AUTH_TOKEN }}
           IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
         run: |
-          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${IMAGE} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${LINEAR_API_KEY} ${INTERNAL_AUTOMATION_AUTH_TOKEN} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
+          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${ELASTICSEARCH_PWD} ${IMAGE} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${LINEAR_API_KEY} ${INTERNAL_AUTOMATION_AUTH_TOKEN} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
       - name: Run deploy.sh
         if: ${{ env.HAS_DEPLOY_SCRIPT == 'Y'}}
@@ -234,6 +241,7 @@ jobs:
           GRAFC_TRACE_USER: ${{ env.GRAFC_TRACE_USER }}
           GRAFC_TRACE_PWD: ${{ env.GRAFC_TRACE_PWD }}
           TARGET_PLATFORM: ${{ env.TARGET_PLATFORM }}
+          ELASTICSEARCH_PWD: ${{ env.ELASTICSEARCH_PWD }}
           IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
         run: |
           bash deploy.sh
