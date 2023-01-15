@@ -157,7 +157,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./
-          file: ./${{ inputs.service }}.dockerfile
+          file: ./deployment/docker/${{ inputs.service }}.dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           build-args: |
