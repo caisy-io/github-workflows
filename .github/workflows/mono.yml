@@ -63,6 +63,15 @@ jobs:
           ELASTICSEARCH_HOST_AZURE_STAGING: ${{ secrets.ELASTICSEARCH_HOST_AZURE_STAGING }}
           ELASTICSEARCH_PWD_AZURE_PROD: ${{ secrets.ELASTICSEARCH_PWD_AZURE_PROD }}
           ELASTICSEARCH_HOST_AZURE_PROD: ${{ secrets.ELASTICSEARCH_HOST_AZURE_PROD }}
+          BILLING_STRIPE_KEY_DEV: ${{ secrets.BILLING_STRIPE_KEY_DEV }}
+          BILLING_STRIPE_WEBHOOK_SECRET_DEV: ${{ secrets.BILLING_STRIPE_WEBHOOK_SECRET_DEV }}
+          BILLING_STRIPE_RETURN_BASE_URL_DEV: ${{ secrets.BILLING_STRIPE_RETURN_BASE_URL_DEV }}
+          BILLING_STRIPE_KEY_STAGING: ${{ secrets.BILLING_STRIPE_KEY_STAGING }}
+          BILLING_STRIPE_WEBHOOK_SECRET_STAGING: ${{ secrets.BILLING_STRIPE_WEBHOOK_SECRET_STAGING }}
+          BILLING_STRIPE_RETURN_BASE_URL_STAGING: ${{ secrets.BILLING_STRIPE_RETURN_BASE_URL_STAGING }}
+          BILLING_STRIPE_KEY_PROD: ${{ secrets.BILLING_STRIPE_KEY_PROD }}
+          BILLING_STRIPE_WEBHOOK_SECRET_PROD: ${{ secrets.BILLING_STRIPE_WEBHOOK_SECRET_PROD }}
+          BILLING_STRIPE_RETURN_BASE_URL_PROD: ${{ secrets.BILLING_STRIPE_RETURN_BASE_URL_PROD }}
           INPUT_ENV: ${{ github.event.client_payload.environment }}
         run: |
           echo "TARGET_PLATFORM=AZURE" >> "$GITHUB_ENV"
@@ -95,6 +104,9 @@ jobs:
               echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_PROD" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_PROD" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_PROD" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_PROD" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_PROD" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_PROD" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/staging' || $INPUT_ENV == "staging" ]]; then
               echo "using staging environment"
               echo "CENV=staging" >> "$GITHUB_ENV"
@@ -115,6 +127,9 @@ jobs:
               echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_STAGING" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_STAGING" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_STAGING" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_STAGING" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_STAGING" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_STAGING" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
@@ -135,6 +150,9 @@ jobs:
               echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_DEV" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_DEV" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_DEV" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_DEV" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_DEV" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_DEV" >> "$GITHUB_ENV"
           else 
               echo "branch not target of the deployment: $GITHUB_REF"
           fi
@@ -223,7 +241,7 @@ jobs:
           INTERNAL_AUTOMATION_AUTH_TOKEN: ${{ secrets.INTERNAL_AUTOMATION_AUTH_TOKEN }}
           IMAGE: caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
         run: |
-          mkdir -p /tmp/deployment/k8s/${{ inputs.service }} && for filename in deployment/k8s/${{ inputs.service }}/*; do envsubst '${ASSET_SERVE_URL} ${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${ELASTICSEARCH_PWD} ${ELASTICSEARCH_HOST} ${IMAGE} ${NEXT_PUBLIC_INTERCOM_ID} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${LINEAR_API_KEY} ${INTERNAL_AUTOMATION_AUTH_TOKEN} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
+          mkdir -p /tmp/deployment/k8s/${{ inputs.service }} && for filename in deployment/k8s/${{ inputs.service }}/*; do envsubst '${BILLING_STRIPE_KEY} ${BILLING_STRIPE_WEBHOOK_SECRET} ${BILLING_STRIPE_RETURN_BASE_URL} ${ASSET_SERVE_URL} ${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${ELASTICSEARCH_PWD} ${ELASTICSEARCH_HOST} ${IMAGE} ${NEXT_PUBLIC_INTERCOM_ID} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${LINEAR_API_KEY} ${INTERNAL_AUTOMATION_AUTH_TOKEN} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
       # - name: Run deploy.sh
       #   if: ${{ env.HAS_DEPLOY_SCRIPT == 'Y'}}

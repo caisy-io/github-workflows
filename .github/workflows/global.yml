@@ -59,18 +59,6 @@ jobs:
           ELASTICSEARCH_HOST_AZURE_STAGING: ${{ secrets.ELASTICSEARCH_HOST_AZURE_STAGING }}
           ELASTICSEARCH_PWD_AZURE_PROD: ${{ secrets.ELASTICSEARCH_PWD_AZURE_PROD }}
           ELASTICSEARCH_HOST_AZURE_PROD: ${{ secrets.ELASTICSEARCH_HOST_AZURE_PROD }}
-          BILLING_STRIPE_KEY_DEV: ${{ secrets.BILLING_STRIPE_KEY_DEV }}
-          BILLING_STRIPE_KEY_STAGING: ${{ secrets.BILLING_STRIPE_KEY_STAGING }}
-          BILLING_STRIPE_KEY_PROD: ${{ secrets.BILLING_STRIPE_KEY_PROD }}
-          BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS_DEV: ${{ secrets.BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS_DEV }}
-          BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS_STAGING: ${{ secrets.BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS_STAGING }}
-          BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS_PROD: ${{ secrets.BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS_PROD }}
-          BILLING_SUCCESS_URL_DEV: ${{ secrets.BILLING_SUCCESS_URL_DEV }}
-          BILLING_SUCCESS_URL_STAGING: ${{ secrets.BILLING_SUCCESS_URL_STAGING }}
-          BILLING_SUCCESS_URL_PROD: ${{ secrets.BILLING_SUCCESS_URL_PROD }}
-          BILLING_CANCEL_URL_DEV: ${{ secrets.BILLING_CANCEL_URL_DEV }}
-          BILLING_CANCEL_URL_STAGING: ${{ secrets.BILLING_CANCEL_URL_STAGING }}
-          BILLING_CANCEL_URL_PROD: ${{ secrets.BILLING_CANCEL_URL_PROD }}
           INPUT_ENV: ${{ github.event.client_payload.environment }}
         run: |
           echo "TARGET_PLATFORM=AZURE" >> "$GITHUB_ENV"
@@ -103,10 +91,6 @@ jobs:
               echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_PROD" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_PROD" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_PROD" >> "$GITHUB_ENV"
-              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_PROD" >> "$GITHUB_ENV"
-              echo "BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS=$BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS_PROD" >> "$GITHUB_ENV"
-              echo "BILLING_SUCCESS_URL=$BILLING_SUCCESS_URL_PROD" >> "$GITHUB_ENV"
-              echo "BILLING_CANCEL_URL=$BILLING_CANCEL_URL_PROD" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/staging' || $INPUT_ENV == "staging" ]]; then
               echo "using staging environment"
               echo "CENV=staging" >> "$GITHUB_ENV"
@@ -127,10 +111,6 @@ jobs:
               echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_STAGING" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_STAGING" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_STAGING" >> "$GITHUB_ENV"
-              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_STAGING" >> "$GITHUB_ENV"
-              echo "BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS=$BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS_STAGING" >> "$GITHUB_ENV"
-              echo "BILLING_SUCCESS_URL=$BILLING_SUCCESS_URL_STAGING" >> "$GITHUB_ENV"
-              echo "BILLING_CANCEL_URL=$BILLING_CANCEL_URL_STAGING" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
@@ -151,10 +131,6 @@ jobs:
               echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_DEV" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_DEV" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_DEV" >> "$GITHUB_ENV"
-              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_DEV" >> "$GITHUB_ENV"
-              echo "BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS=$BILLING_ENDPOINT_STRIPE_LOCAL_EVENTS_DEV" >> "$GITHUB_ENV"
-              echo "BILLING_SUCCESS_URL=$BILLING_SUCCESS_URL_DEV" >> "$GITHUB_ENV"
-              echo "BILLING_CANCEL_URL=$BILLING_CANCEL_URL_DEV" >> "$GITHUB_ENV"
           else 
               echo "branch not target of the deployment: $GITHUB_REF"
           fi
