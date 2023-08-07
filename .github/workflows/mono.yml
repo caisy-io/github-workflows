@@ -472,7 +472,7 @@ jobs:
         uses: "google-github-actions/get-gke-credentials@v1"
         with:
           cluster_name: caisy-${{ env.CENV }}
-          location: europe-west3-b
+          location: europe-west3
 
       - name: Apply kubectl
         if: ${{ env.HAS_DEPLOY_SCRIPT != 'Y'}}
