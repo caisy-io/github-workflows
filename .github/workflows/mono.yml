@@ -182,12 +182,10 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           build-args: |
-            NEXT_PUBLIC_INTERCOM_ID=${{ secrets.NEXT_PUBLIC_INTERCOM_ID }}
             NEXT_PUBLIC_FIRE_APIKEY=${{ env.NEXT_PUBLIC_FIRE_APIKEY }}
             NEXT_PUBLIC_FIRE_AUTHDOMAIN=${{ env.NEXT_PUBLIC_FIRE_AUTHDOMAIN }}
             CORE_URL=${{ env.CORE_URL }}
             ASSET_SERVE_URL=${{ env.ASSET_SERVE_URL }}
-            NEXT_PUBLIC_SERVICE_NAME=${{ env.CENV }}-caisy-web-app
           tags: |
             caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
             caisyreg${{ env.CENV }}.azurecr.io/${{ env.CI_PROJECT_NAME }}:latest
@@ -417,9 +415,14 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: ./
-          file: ./Dockerfile
+          file: ./deployment/docker/${{ inputs.service }}.dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
+          build-args: |
+            NEXT_PUBLIC_FIRE_APIKEY=${{ env.NEXT_PUBLIC_FIRE_APIKEY }}
+            NEXT_PUBLIC_FIRE_AUTHDOMAIN=${{ env.NEXT_PUBLIC_FIRE_AUTHDOMAIN }}
+            CORE_URL=${{ env.CORE_URL }}
+            ASSET_SERVE_URL=${{ env.ASSET_SERVE_URL }}
           tags: |
             gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
             gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:latest
