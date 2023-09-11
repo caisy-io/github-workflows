@@ -502,3 +502,33 @@ jobs:
           IMAGE: gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
         run: |
           mkdir -p /tmp/deployment/k8s/${{ inputs.service }} && for filename in deployment/k8s/${{ inputs.service }}/*; do envsubst '${X_GOOGLE_APPLICATION_CREDENTIALS} ${BILLING_STRIPE_KEY} ${BILLING_STRIPE_WEBHOOK_SECRET} ${BILLING_STRIPE_RETURN_BASE_URL} ${ASSET_SERVE_URL} ${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${ELASTICSEARCH_PWD} ${ELASTICSEARCH_HOST} ${IMAGE} ${NEXT_PUBLIC_INTERCOM_ID} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${LINEAR_API_KEY} ${INTERNAL_AUTOMATION_AUTH_TOKEN} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && cat /tmp/${filename} && kubectl apply -f /tmp/${filename}; done
+          
+      - name: Run deploy.sh
+        if: ${{ env.HAS_DEPLOY_SCRIPT == 'Y'}}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+          X_GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+          NEXT_PUBLIC_FIRE_APIKEY: ${{ env.NEXT_PUBLIC_FIRE_APIKEY }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN: ${{ env.NEXT_PUBLIC_FIRE_AUTHDOMAIN }}
+          ASSETS_BASE_PATH: ${{ env.ASSETS_BASE_PATH }}
+          BUCKET_NAME: ${{ env.BUCKET_NAME }}
+          CORE_URL: ${{ env.CORE_URL }}
+          ASSET_SERVE_URL: ${{ env.ASSET_SERVE_URL }}
+          CENV: ${{ env.CENV }}
+          GRAFC_PROM_USER: ${{ env.GRAFC_PROM_USER }}
+          GRAFC_PROM_PWD: ${{ env.GRAFC_PROM_PWD }}
+          GRAFC_LOGS_USER: ${{ env.GRAFC_LOGS_USER }}
+          GRAFC_LOGS_PWD: ${{ env.GRAFC_LOGS_PWD }}
+          GRAFC_TRACE_USER: ${{ env.GRAFC_TRACE_USER }}
+          GRAFC_TRACE_PWD: ${{ env.GRAFC_TRACE_PWD }}
+          TARGET_PLATFORM: ${{ env.TARGET_PLATFORM }}
+          ELASTICSEARCH_PWD: ${{ env.ELASTICSEARCH_PWD }}
+          ELASTICSEARCH_HOST: ${{ env.ELASTICSEARCH_HOST }}
+          LINEAR_API_KEY: ${{ secrets.LINEAR_API_KEY }}
+          INTERNAL_AUTOMATION_AUTH_TOKEN: ${{ secrets.INTERNAL_AUTOMATION_AUTH_TOKEN }}
+          IMAGE: gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+        run: |
+          bash deploy.sh

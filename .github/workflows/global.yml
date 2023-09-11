@@ -284,231 +284,231 @@ jobs:
       #   run: |
       #     mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
-  # google:
-  #   runs-on: ubuntu-latest
-  #   if: ${{ github.ref != 'refs/heads/dev' && github.event.client_payload.environment != 'dev' }}
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #       name: target checkout
-  #       if: github.event.client_payload.environment
-  #       with:
-  #         ref: ${{ github.event.client_payload.environment }}
-  #     - uses: actions/checkout@v2
-  #       name: normal checkout
-  #       if: ${{ !github.event.client_payload.environment }}
-  #     - name: Set environment for branch
-  #       env:
-  #         GRAFC_PROM_USER_DEV: ${{ secrets.GRAFC_PROM_USER_DEV }}
-  #         GRAFC_PROM_PWD_DEV: ${{ secrets.GRAFC_PROM_PWD_DEV }}
-  #         GRAFC_LOGS_USER_DEV: ${{ secrets.GRAFC_LOGS_USER_DEV }}
-  #         GRAFC_LOGS_PWD_DEV: ${{ secrets.GRAFC_LOGS_PWD_DEV }}
-  #         GRAFC_TRACE_USER_DEV: ${{ secrets.GRAFC_TRACE_USER_DEV }}
-  #         GRAFC_TRACE_PWD_DEV: ${{ secrets.GRAFC_TRACE_PWD_DEV }}
-  #         GRAFC_PROM_PWD_STAGING: ${{ secrets.GRAFC_PROM_PWD_STAGING }}
-  #         GRAFC_LOGS_USER_STAGING: ${{ secrets.GRAFC_LOGS_USER_STAGING }}
-  #         GRAFC_LOGS_PWD_STAGING: ${{ secrets.GRAFC_LOGS_PWD_STAGING }}
-  #         GRAFC_PROM_USER_STAGING: ${{ secrets.GRAFC_PROM_USER_STAGING }}
-  #         GRAFC_TRACE_USER_STAGING: ${{ secrets.GRAFC_TRACE_USER_STAGING }}
-  #         GRAFC_TRACE_PWD_STAGING: ${{ secrets.GRAFC_TRACE_PWD_STAGING }}
-  #         GRAFC_PROM_USER_PROD: ${{ secrets.GRAFC_PROM_USER_PROD }}
-  #         GRAFC_PROM_PWD_PROD: ${{ secrets.GRAFC_PROM_PWD_PROD }}
-  #         GRAFC_LOGS_USER_PROD: ${{ secrets.GRAFC_LOGS_USER_PROD }}
-  #         GRAFC_LOGS_PWD_PROD: ${{ secrets.GRAFC_LOGS_PWD_PROD }}
-  #         GRAFC_TRACE_USER_PROD: ${{ secrets.GRAFC_TRACE_USER_PROD }}
-  #         GRAFC_TRACE_PWD_PROD: ${{ secrets.GRAFC_TRACE_PWD_PROD }}
-  #         DATABASE_URL_DEV: ${{ secrets.DATABASE_URL_DEV }}
-  #         DATABASE_URL_STAGING: ${{ secrets.DATABASE_URL_STAGING }}
-  #         DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
-  #         GOOGLE_APPLICATION_CREDENTIALS_DEV: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_DEV }}
-  #         GOOGLE_APPLICATION_CREDENTIALS_STAGING: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_STAGING }}
-  #         GOOGLE_APPLICATION_CREDENTIALS_PROD: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_PROD }}
-  #         NEXT_PUBLIC_FIRE_APIKEY_DEV: ${{ secrets.NEXT_PUBLIC_FIRE_APIKEY_DEV }}
-  #         NEXT_PUBLIC_FIRE_APIKEY_STAGING: ${{ secrets.NEXT_PUBLIC_FIRE_APIKEY_STAGING }}
-  #         NEXT_PUBLIC_FIRE_APIKEY_PROD: ${{ secrets.NEXT_PUBLIC_FIRE_APIKEY_PROD }}
-  #         NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV: ${{ secrets.NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV }}
-  #         NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING: ${{ secrets.NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING }}
-  #         NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD: ${{ secrets.NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD }}
-  #         INPUT_ENV: ${{ github.event.client_payload.environment }}
-  #       run: |
-  #         echo "TARGET_PLATFORM=GCLOUD" >> "$GITHUB_ENV"
-  #         if test -f "build.sh"; then
-  #             echo "build.sh exists."
-  #             echo "HAS_BUILD_SCRIPT=Y" >> "$GITHUB_ENV"
-  #         fi
-  #         if test -f "deploy.sh"; then
-  #             echo "deploy.sh exists."
-  #             echo "HAS_DEPLOY_SCRIPT=Y" >> "$GITHUB_ENV"
-  #         fi
-  #         echo "input env: $INPUT_ENV"
-  #         echo "input env: $INPUT_ENV"
-  #         if [[ $GITHUB_REF == 'refs/heads/prod' || $INPUT_ENV == "prod" ]]; then
-  #             echo "using prod environment"
-  #             echo "CENV=prod" >> "$GITHUB_ENV"
-  #             echo "DATABASE_URL=$DATABASE_URL_PROD" >> "$GITHUB_ENV"
-  #             echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PROD" >> "$GITHUB_ENV"
-  #             echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_PROD" >> "$GITHUB_ENV"
-  #             echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD" >> "$GITHUB_ENV"
-  #             echo "BUCKET_NAME=caisy-assets-prod" >> "$GITHUB_ENV"
-  #             echo "ASSETS_BASE_PATH=https://assets.caisy.io/assets" >> "$GITHUB_ENV"
-  #             echo "CORE_URL=https://caisy.io" >> "$GITHUB_ENV"
-  #             echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_PROD" >> "$GITHUB_ENV"
-  #             echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_PROD" >> "$GITHUB_ENV"
-  #             echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_PROD" >> "$GITHUB_ENV"
-  #             echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_PROD" >> "$GITHUB_ENV"
-  #             echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_PROD" >> "$GITHUB_ENV"
-  #             echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_PROD" >> "$GITHUB_ENV"
-  #         elif [[ $GITHUB_REF == 'refs/heads/staging' || $INPUT_ENV == "staging" ]]; then
-  #             echo "using staging environment"
-  #             echo "CENV=staging" >> "$GITHUB_ENV"
-  #             echo "DATABASE_URL=$DATABASE_URL_STAGING" >> "$GITHUB_ENV"
-  #             echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_STAGING" >> "$GITHUB_ENV"
-  #             echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_STAGING" >> "$GITHUB_ENV"
-  #             echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING" >> "$GITHUB_ENV"
-  #             echo "BUCKET_NAME=caisy-assets-staging" >> "$GITHUB_ENV"
-  #             echo "ASSETS_BASE_PATH=https://assets.staging.caisy.io/assets" >> "$GITHUB_ENV"
-  #             echo "CORE_URL=https://staging.caisy.io" >> "$GITHUB_ENV"
-  #             echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_STAGING" >> "$GITHUB_ENV"
-  #             echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_STAGING" >> "$GITHUB_ENV"
-  #             echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_STAGING" >> "$GITHUB_ENV"
-  #             echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_STAGING" >> "$GITHUB_ENV"
-  #             echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_STAGING" >> "$GITHUB_ENV"
-  #             echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_STAGING" >> "$GITHUB_ENV"
-  #         elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
-  #             echo "using dev environment"
-  #             echo "CENV=dev" >> "$GITHUB_ENV"
-  #             echo "DATABASE_URL=$DATABASE_URL_DEV" >> "$GITHUB_ENV"
-  #             echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
-  #             echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_DEV" >> "$GITHUB_ENV"
-  #             echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV" >> "$GITHUB_ENV"
-  #             echo "BUCKET_NAME=caisy-assets-dev" >> "$GITHUB_ENV"
-  #             echo "ASSETS_BASE_PATH=https://assets.dev.caisy.io/assets" >> "$GITHUB_ENV"
-  #             echo "CORE_URL=https://dev.caisy.io" >> "$GITHUB_ENV"
-  #             echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_DEV" >> "$GITHUB_ENV"
-  #             echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_DEV" >> "$GITHUB_ENV"
-  #             echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_DEV" >> "$GITHUB_ENV"
-  #             echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_DEV" >> "$GITHUB_ENV"
-  #             echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_DEV" >> "$GITHUB_ENV"
-  #             echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_DEV" >> "$GITHUB_ENV"
-  #         else
-  #             echo "branch not target of the deployment: $GITHUB_REF"
-  #         fi
+  google:
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/dev' || github.event.client_payload.environment == 'dev' }}
+    steps:
+      - uses: actions/checkout@v2
+        name: target checkout
+        if: github.event.client_payload.environment
+        with:
+          ref: ${{ github.event.client_payload.environment }}
+      - uses: actions/checkout@v2
+        name: normal checkout
+        if: ${{ !github.event.client_payload.environment }}
+      - name: Set environment for branch
+        env:
+          GRAFC_PROM_USER_DEV: ${{ secrets.GRAFC_PROM_USER_DEV }}
+          GRAFC_PROM_PWD_DEV: ${{ secrets.GRAFC_PROM_PWD_DEV }}
+          GRAFC_LOGS_USER_DEV: ${{ secrets.GRAFC_LOGS_USER_DEV }}
+          GRAFC_LOGS_PWD_DEV: ${{ secrets.GRAFC_LOGS_PWD_DEV }}
+          GRAFC_TRACE_USER_DEV: ${{ secrets.GRAFC_TRACE_USER_DEV }}
+          GRAFC_TRACE_PWD_DEV: ${{ secrets.GRAFC_TRACE_PWD_DEV }}
+          GRAFC_PROM_PWD_STAGING: ${{ secrets.GRAFC_PROM_PWD_STAGING }}
+          GRAFC_LOGS_USER_STAGING: ${{ secrets.GRAFC_LOGS_USER_STAGING }}
+          GRAFC_LOGS_PWD_STAGING: ${{ secrets.GRAFC_LOGS_PWD_STAGING }}
+          GRAFC_PROM_USER_STAGING: ${{ secrets.GRAFC_PROM_USER_STAGING }}
+          GRAFC_TRACE_USER_STAGING: ${{ secrets.GRAFC_TRACE_USER_STAGING }}
+          GRAFC_TRACE_PWD_STAGING: ${{ secrets.GRAFC_TRACE_PWD_STAGING }}
+          GRAFC_PROM_USER_PROD: ${{ secrets.GRAFC_PROM_USER_PROD }}
+          GRAFC_PROM_PWD_PROD: ${{ secrets.GRAFC_PROM_PWD_PROD }}
+          GRAFC_LOGS_USER_PROD: ${{ secrets.GRAFC_LOGS_USER_PROD }}
+          GRAFC_LOGS_PWD_PROD: ${{ secrets.GRAFC_LOGS_PWD_PROD }}
+          GRAFC_TRACE_USER_PROD: ${{ secrets.GRAFC_TRACE_USER_PROD }}
+          GRAFC_TRACE_PWD_PROD: ${{ secrets.GRAFC_TRACE_PWD_PROD }}
+          DATABASE_URL_DEV: ${{ secrets.DATABASE_URL_DEV }}
+          DATABASE_URL_STAGING: ${{ secrets.DATABASE_URL_STAGING }}
+          DATABASE_URL_PROD: ${{ secrets.DATABASE_URL_PROD }}
+          GOOGLE_APPLICATION_CREDENTIALS_DEV: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_DEV }}
+          GOOGLE_APPLICATION_CREDENTIALS_STAGING: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_STAGING }}
+          GOOGLE_APPLICATION_CREDENTIALS_PROD: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_PROD }}
+          NEXT_PUBLIC_FIRE_APIKEY_DEV: ${{ secrets.NEXT_PUBLIC_FIRE_APIKEY_DEV }}
+          NEXT_PUBLIC_FIRE_APIKEY_STAGING: ${{ secrets.NEXT_PUBLIC_FIRE_APIKEY_STAGING }}
+          NEXT_PUBLIC_FIRE_APIKEY_PROD: ${{ secrets.NEXT_PUBLIC_FIRE_APIKEY_PROD }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV: ${{ secrets.NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING: ${{ secrets.NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD: ${{ secrets.NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD }}
+          INPUT_ENV: ${{ github.event.client_payload.environment }}
+        run: |
+          echo "TARGET_PLATFORM=GCLOUD" >> "$GITHUB_ENV"
+          if test -f "build.sh"; then
+              echo "build.sh exists."
+              echo "HAS_BUILD_SCRIPT=Y" >> "$GITHUB_ENV"
+          fi
+          if test -f "deploy.sh"; then
+              echo "deploy.sh exists."
+              echo "HAS_DEPLOY_SCRIPT=Y" >> "$GITHUB_ENV"
+          fi
+          echo "input env: $INPUT_ENV"
+          echo "input env: $INPUT_ENV"
+          if [[ $GITHUB_REF == 'refs/heads/prod' || $INPUT_ENV == "prod" ]]; then
+              echo "using prod environment"
+              echo "CENV=prod" >> "$GITHUB_ENV"
+              echo "DATABASE_URL=$DATABASE_URL_PROD" >> "$GITHUB_ENV"
+              echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PROD" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_PROD" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD" >> "$GITHUB_ENV"
+              echo "BUCKET_NAME=caisy-assets-prod" >> "$GITHUB_ENV"
+              echo "ASSETS_BASE_PATH=https://assets.caisy.io/assets" >> "$GITHUB_ENV"
+              echo "CORE_URL=https://caisy.io" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_PROD" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_PROD" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_PROD" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_PROD" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_PROD" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_PROD" >> "$GITHUB_ENV"
+          elif [[ $GITHUB_REF == 'refs/heads/staging' || $INPUT_ENV == "staging" ]]; then
+              echo "using staging environment"
+              echo "CENV=staging" >> "$GITHUB_ENV"
+              echo "DATABASE_URL=$DATABASE_URL_STAGING" >> "$GITHUB_ENV"
+              echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_STAGING" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_STAGING" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING" >> "$GITHUB_ENV"
+              echo "BUCKET_NAME=caisy-assets-staging" >> "$GITHUB_ENV"
+              echo "ASSETS_BASE_PATH=https://assets.staging.caisy.io/assets" >> "$GITHUB_ENV"
+              echo "CORE_URL=https://staging.caisy.io" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_STAGING" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_STAGING" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_STAGING" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_STAGING" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_STAGING" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_STAGING" >> "$GITHUB_ENV"
+          elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
+              echo "using dev environment"
+              echo "CENV=dev" >> "$GITHUB_ENV"
+              echo "DATABASE_URL=$DATABASE_URL_DEV" >> "$GITHUB_ENV"
+              echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_DEV" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV" >> "$GITHUB_ENV"
+              echo "BUCKET_NAME=caisy-assets-dev" >> "$GITHUB_ENV"
+              echo "ASSETS_BASE_PATH=https://assets.dev.caisy.io/assets" >> "$GITHUB_ENV"
+              echo "CORE_URL=https://dev.caisy.io" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_DEV" >> "$GITHUB_ENV"
+          else
+              echo "branch not target of the deployment: $GITHUB_REF"
+          fi
 
-  #     - id: "auth-dev"
-  #       if: ${{ env.CENV == 'dev' }}
-  #       uses: "google-github-actions/auth@v0"
-  #       with:
-  #         credentials_json: "${{ secrets.gcp_credentials_dev }}"
+      - id: "auth-dev"
+        if: ${{ env.CENV == 'dev' }}
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.gcp_credentials_dev }}"
 
-  #     - id: "auth-staging"
-  #       if: ${{ env.CENV == 'staging' }}
-  #       uses: "google-github-actions/auth@v0"
-  #       with:
-  #         credentials_json: "${{ secrets.gcp_credentials_staging }}"
+      - id: "auth-staging"
+        if: ${{ env.CENV == 'staging' }}
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.gcp_credentials_staging }}"
 
-  #     - id: "auth-prod"
-  #       if: ${{ env.CENV == 'prod' }}
-  #       uses: "google-github-actions/auth@v0"
-  #       with:
-  #         credentials_json: "${{ secrets.gcp_credentials_prod }}"
+      - id: "auth-prod"
+        if: ${{ env.CENV == 'prod' }}
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.gcp_credentials_prod }}"
 
-  #     - run: |-
-  #         gcloud --quiet auth configure-docker
+      - run: |-
+          gcloud --quiet auth configure-docker
 
-  #     - name: custom_build
-  #       if: ${{ env.HAS_BUILD_SCRIPT == 'Y'}}
-  #       run: |
-  #         bash build.sh
-  #     # Build the Docker image
-  #     - name: Setup Docker Buildx
-  #       id: buildx
-  #       if: ${{ env.HAS_BUILD_SCRIPT != 'Y'}}
-  #       uses: docker/setup-buildx-action@v1
+      - name: custom_build
+        if: ${{ env.HAS_BUILD_SCRIPT == 'Y'}}
+        run: |
+          bash build.sh
+      # Build the Docker image
+      - name: Setup Docker Buildx
+        id: buildx
+        if: ${{ env.HAS_BUILD_SCRIPT != 'Y'}}
+        uses: docker/setup-buildx-action@v1
 
-  #     - name: Build and Push Docker Image
-  #       id: docker_build
-  #       if: ${{ env.HAS_BUILD_SCRIPT != 'Y'}}
-  #       uses: docker/build-push-action@v2
-  #       with:
-  #         context: ./
-  #         file: ./Dockerfile
-  #         builder: ${{ steps.buildx.outputs.name }}
-  #         push: true
-  #         tags: |
-  #           gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-  #           gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:latest
-  #         cache-from: type=registry,ref=gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:latest
-  #         cache-to: type=inline
+      - name: Build and Push Docker Image
+        id: docker_build
+        if: ${{ env.HAS_BUILD_SCRIPT != 'Y'}}
+        uses: docker/build-push-action@v2
+        with:
+          context: ./
+          file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: |
+            gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+            gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:latest
+          cache-from: type=registry,ref=gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:latest
+          cache-to: type=inline
 
-  #     - id: "get-credentials-k8s"
-  #       uses: "google-github-actions/get-gke-credentials@v0"
-  #       with:
-  #         cluster_name: caisy-${{ env.CENV }}
-  #         location: europe-west3-b
+      - id: "get-credentials-k8s"
+        uses: "google-github-actions/get-gke-credentials@v0"
+        with:
+          cluster_name: caisy-${{ env.CENV }}
+          location: europe-west3-b
 
-      # - name: Run deploy.sh
-      #   if: ${{ env.HAS_DEPLOY_SCRIPT == 'Y'}}
-      #   env:
-      #     GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
-      #     DATABASE_URL: ${{ env.DATABASE_URL }}
-      #     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-      #     CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-      #     NEXT_PUBLIC_FIRE_APIKEY: ${{ env.NEXT_PUBLIC_FIRE_APIKEY }}
-      #     NEXT_PUBLIC_FIRE_AUTHDOMAIN: ${{ env.NEXT_PUBLIC_FIRE_AUTHDOMAIN }}
-      #     ASSETS_BASE_PATH: ${{ env.ASSETS_BASE_PATH }}
-      #     BUCKET_NAME: ${{ env.BUCKET_NAME }}
-      #     CORE_URL: ${{ env.CORE_URL }}
-      #     CENV: ${{ env.CENV }}
-      #     GRAFC_PROM_USER: ${{ env.GRAFC_PROM_USER }}
-      #     GRAFC_PROM_PWD: ${{ env.GRAFC_PROM_PWD }}
-      #     GRAFC_LOGS_USER: ${{ env.GRAFC_LOGS_USER }}
-      #     GRAFC_LOGS_PWD: ${{ env.GRAFC_LOGS_PWD }}
-      #     GRAFC_TRACE_USER: ${{ env.GRAFC_TRACE_USER }}
-      #     GRAFC_TRACE_PWD: ${{ env.GRAFC_TRACE_PWD }}
-      #     TARGET_PLATFORM: ${{ env.TARGET_PLATFORM }}
-      #     ELASTICSEARCH_HOST: 'https://document-elastic-es-http:9200'
-      #     IMAGE: gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-      #   run: |
-      #     bash deploy.sh
-      # - name: Apply kubectl dev
-      #   if: ${{ env.CENV == 'dev' }}
-      #   env:
-      #     GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
-      #     DATABASE_URL: ${{ env.DATABASE_URL }}
-      #     SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
-      #     CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-      #     CENV: ${{ env.CENV }}
-      #     ASSETS_BASE_PATH: https://assets.dev.caisy.app/assets
-      #     BUCKET_NAME: caisy-assets-dev
-      #     IMAGE: gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-      #   run: |
-      #     mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
+      - name: Run deploy.sh
+        if: ${{ env.HAS_DEPLOY_SCRIPT == 'Y'}}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+          NEXT_PUBLIC_FIRE_APIKEY: ${{ env.NEXT_PUBLIC_FIRE_APIKEY }}
+          NEXT_PUBLIC_FIRE_AUTHDOMAIN: ${{ env.NEXT_PUBLIC_FIRE_AUTHDOMAIN }}
+          ASSETS_BASE_PATH: ${{ env.ASSETS_BASE_PATH }}
+          BUCKET_NAME: ${{ env.BUCKET_NAME }}
+          CORE_URL: ${{ env.CORE_URL }}
+          CENV: ${{ env.CENV }}
+          GRAFC_PROM_USER: ${{ env.GRAFC_PROM_USER }}
+          GRAFC_PROM_PWD: ${{ env.GRAFC_PROM_PWD }}
+          GRAFC_LOGS_USER: ${{ env.GRAFC_LOGS_USER }}
+          GRAFC_LOGS_PWD: ${{ env.GRAFC_LOGS_PWD }}
+          GRAFC_TRACE_USER: ${{ env.GRAFC_TRACE_USER }}
+          GRAFC_TRACE_PWD: ${{ env.GRAFC_TRACE_PWD }}
+          TARGET_PLATFORM: ${{ env.TARGET_PLATFORM }}
+          ELASTICSEARCH_HOST: 'https://document-elastic-es-http:9200'
+          IMAGE: gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+        run: |
+          bash deploy.sh
+      - name: Apply kubectl dev
+        if: ${{ env.CENV == 'dev' }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ env.GOOGLE_APPLICATION_CREDENTIALS }}
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+          SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+          CENV: ${{ env.CENV }}
+          ASSETS_BASE_PATH: https://assets.dev.caisy.app/assets
+          BUCKET_NAME: caisy-assets-dev
+          IMAGE: gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+        run: |
+          mkdir -p /tmp/k8s && for filename in k8s/*; do envsubst '${IMAGE} ${SENDGRID_API_KEY} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename} && kubectl apply -f /tmp/${filename} && cat /tmp/${filename}; done
 
-  #     - name: Apply kubectl staging
-  #       if: github.ref == 'refs/heads/staging'
-  #       env:
-  #         DATABASE_URL: ${{ secrets.database_url_staging }}
-  #         CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-  #         CENV: staging
-  #         IMAGE: gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-  #       run: |
-  #         envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
-  #         envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
-  #         envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
-  #         kubectl apply -f /tmp/deployment.yaml && \
-  #         kubectl apply -f /tmp/service.yaml && \
-  #         kubectl apply -f /tmp/autoscaler.yaml
+      - name: Apply kubectl staging
+        if: github.ref == 'refs/heads/staging'
+        env:
+          DATABASE_URL: ${{ secrets.database_url_staging }}
+          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+          CENV: staging
+          IMAGE: gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+        run: |
+          envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
+          envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
+          envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
+          kubectl apply -f /tmp/deployment.yaml && \
+          kubectl apply -f /tmp/service.yaml && \
+          kubectl apply -f /tmp/autoscaler.yaml
 
-  #     - name: Apply kubectl prod
-  #       if: github.ref == 'refs/heads/prod'
-  #       env:
-  #         CENV: prod
-  #         DATABASE_URL: ${{ secrets.database_url_prod }}
-  #         CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
-  #         IMAGE: gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
-  #       run: |
-  #         envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
-  #         envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
-  #         envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
-  #         kubectl apply -f /tmp/deployment.yaml && \
-  #         kubectl apply -f /tmp/service.yaml && \
-  #         kubectl apply -f /tmp/autoscaler.yaml
+      - name: Apply kubectl prod
+        if: github.ref == 'refs/heads/prod'
+        env:
+          CENV: prod
+          DATABASE_URL: ${{ secrets.database_url_prod }}
+          CI_PROJECT_NAME: ${{ env.CI_PROJECT_NAME }}
+          IMAGE: gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}:${{ github.sha }}
+        run: |
+          envsubst '${IMAGE} ${DATABASE_URL} ${CI_PROJECT_NAME} ${CENV}' <./k8s/deployment.yaml >/tmp/deployment.yaml && \
+          envsubst '$CI_PROJECT_NAME' < ./k8s/service.yaml > /tmp/service.yaml &&  \
+          envsubst '$CI_PROJECT_NAME' < ./k8s/autoscaler.yaml > /tmp/autoscaler.yaml && \
+          kubectl apply -f /tmp/deployment.yaml && \
+          kubectl apply -f /tmp/service.yaml && \
+          kubectl apply -f /tmp/autoscaler.yaml
