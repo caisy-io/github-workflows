@@ -396,7 +396,7 @@ jobs:
               echo "EMAIL_ZEPTO_TEMPLATE_ID_INVITE=$STAGING_EMAIL_ZEPTO_TEMPLATE_ID_INVITE" >> "$GITHUB_ENV"
               echo "EMAIL_ZEPTO_TEMPLATE_ID_PASSWORD_RESET=$STAGING_EMAIL_ZEPTO_TEMPLATE_ID_PASSWORD_RESET" >> "$GITHUB_ENV"
               echo "EMAIL_ZEPTO_TEMPLATE_ID_WELCOME_WITH_CODE=$STAGING_EMAIL_ZEPTO_TEMPLATE_ID_WELCOME_WITH_CODE" >> "$GITHUB_ENV"
-              echo "IMAGE_PREFIX=gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}" >> "$GITHUB_ENV"
+              echo "IMAGE_PREFIX=gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
@@ -420,7 +420,7 @@ jobs:
               echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_DEV" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_DEV" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_DEV" >> "$GITHUB_ENV"
-              echo "IMAGE_PREFIX=gcr.io/caisy-${{ env.CENV }}/${{ env.CI_PROJECT_NAME }}" >> "$GITHUB_ENV"
+              echo "IMAGE_PREFIX=gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}" >> "$GITHUB_ENV"
           else
               echo "branch not target of the deployment: $GITHUB_REF"
           fi
