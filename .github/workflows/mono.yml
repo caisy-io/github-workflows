@@ -474,10 +474,18 @@ jobs:
           cache-to: type=inline
 
       - id: "get-credentials"
+        if: ${{ env.CENV == 'dev'}}
         uses: "google-github-actions/get-gke-credentials@v1"
         with:
           cluster_name: caisy-${{ env.CENV }}
           location: europe-west3
+
+      - id: "get-credentials"
+        if: ${{ env.CENV != 'dev'}}
+        uses: "google-github-actions/get-gke-credentials@v1"
+        with:
+          cluster_name: caisy-${{ env.CENV }}
+          location: europe-west3-b
 
       - name: Apply kubectl
         if: ${{ env.HAS_DEPLOY_SCRIPT != 'Y'}}
