@@ -13,6 +13,7 @@ env:
 jobs:
   azure:
     # if: ${{ github.ref != 'refs/heads/dev' && github.event.client_payload.environment != 'dev' }}
+    if: ${{ github.ref == 'refs/heads/none' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -276,7 +277,6 @@ jobs:
       #     bash deploy.sh
     # if: ${{ github.ref != 'refs/heads/dev' && github.event.client_payload.environment != 'dev' }}
   google:
-    if: ${{ github.ref == 'refs/heads/dev' || github.event.client_payload.environment == 'dev' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
