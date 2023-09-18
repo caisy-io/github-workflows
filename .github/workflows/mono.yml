@@ -373,6 +373,9 @@ jobs:
               echo "EMAIL_ZEPTO_TEMPLATE_ID_PASSWORD_RESET=$PROD_EMAIL_ZEPTO_TEMPLATE_ID_PASSWORD_RESET" >> "$GITHUB_ENV"
               echo "EMAIL_ZEPTO_TEMPLATE_ID_WELCOME_WITH_CODE=$PROD_EMAIL_ZEPTO_TEMPLATE_ID_WELCOME_WITH_CODE" >> "$GITHUB_ENV"
               echo "IMAGE_PREFIX=gcr.io/caisy-io/${{ env.CI_PROJECT_NAME }}" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_PROD" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_PROD" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_PROD" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/staging' || $INPUT_ENV == "staging" ]]; then
               echo "using staging environment"
               echo "CENV=staging" >> "$GITHUB_ENV"
@@ -398,6 +401,9 @@ jobs:
               echo "EMAIL_ZEPTO_TEMPLATE_ID_PASSWORD_RESET=$STAGING_EMAIL_ZEPTO_TEMPLATE_ID_PASSWORD_RESET" >> "$GITHUB_ENV"
               echo "EMAIL_ZEPTO_TEMPLATE_ID_WELCOME_WITH_CODE=$STAGING_EMAIL_ZEPTO_TEMPLATE_ID_WELCOME_WITH_CODE" >> "$GITHUB_ENV"
               echo "IMAGE_PREFIX=gcr.io/caisy-staging/${{ env.CI_PROJECT_NAME }}" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_STAGING" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_STAGING" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_STAGING" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
               echo "CENV=dev" >> "$GITHUB_ENV"
@@ -423,6 +429,9 @@ jobs:
               echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_DEV" >> "$GITHUB_ENV"
               echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_DEV" >> "$GITHUB_ENV"
               echo "IMAGE_PREFIX=gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_DEV" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_DEV" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_DEV" >> "$GITHUB_ENV"
           else
               echo "branch not target of the deployment: $GITHUB_REF"
           fi
