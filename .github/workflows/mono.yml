@@ -516,6 +516,9 @@ jobs:
           CORE_URL: ${{ env.CORE_URL }}
           ASSET_SERVE_URL: ${{ env.ASSET_SERVE_URL }}
           CENV: ${{ env.CENV }}
+          BILLING_STRIPE_KEY: ${{ env.BILLING_STRIPE_KEY }}
+          BILLING_STRIPE_WEBHOOK_SECRET: ${{ env.BILLING_STRIPE_WEBHOOK_SECRET }}
+          BILLING_STRIPE_RETURN_BASE_URL: ${{ env.BILLING_STRIPE_RETURN_BASE_URL }}
           GRAFC_PROM_USER: ${{ env.GRAFC_PROM_USER }}
           GRAFC_PROM_PWD: ${{ env.GRAFC_PROM_PWD }}
           GRAFC_LOGS_USER: ${{ env.GRAFC_LOGS_USER }}
@@ -546,6 +549,9 @@ jobs:
           CORE_URL: ${{ env.CORE_URL }}
           ASSET_SERVE_URL: ${{ env.ASSET_SERVE_URL }}
           CENV: ${{ env.CENV }}
+          BILLING_STRIPE_KEY: ${{ env.BILLING_STRIPE_KEY }}
+          BILLING_STRIPE_WEBHOOK_SECRET: ${{ env.BILLING_STRIPE_WEBHOOK_SECRET }}
+          BILLING_STRIPE_RETURN_BASE_URL: ${{ env.BILLING_STRIPE_RETURN_BASE_URL }}
           GRAFC_PROM_USER: ${{ env.GRAFC_PROM_USER }}
           GRAFC_PROM_PWD: ${{ env.GRAFC_PROM_PWD }}
           GRAFC_LOGS_USER: ${{ env.GRAFC_LOGS_USER }}
