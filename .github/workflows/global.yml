@@ -71,6 +71,7 @@ jobs:
               echo "DATABASE_URL=$GOOGLE_DATABASE_URL_PROD" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PROD" >> "$GITHUB_ENV"
               echo "X_GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PROD" >> "$GITHUB_ENV"
+              echo "X_GOOGLE_APPLICATION_CREDENTIALS_AUTH=$GOOGLE_APPLICATION_CREDENTIALS_AUTH_PROD" >> "$GITHUB_ENV"
               echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_PROD" >> "$GITHUB_ENV"
               echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD" >> "$GITHUB_ENV"
               echo "BUCKET_NAME=caisy-assets-prod" >> "$GITHUB_ENV"
@@ -94,6 +95,7 @@ jobs:
               echo "DATABASE_URL=$GOOGLE_DATABASE_URL_STAGING" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_STAGING" >> "$GITHUB_ENV"
               echo "X_GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_STAGING" >> "$GITHUB_ENV"
+              echo "X_GOOGLE_APPLICATION_CREDENTIALS_AUTH=$GOOGLE_APPLICATION_CREDENTIALS_AUTH_STAGING" >> "$GITHUB_ENV"
               echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_STAGING" >> "$GITHUB_ENV"
               echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_STAGING" >> "$GITHUB_ENV"
               echo "BUCKET_NAME=caisy-assets-staging" >> "$GITHUB_ENV"
@@ -118,6 +120,7 @@ jobs:
               echo "DATABASE_URL=$GOOGLE_DATABASE_URL_DEV" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
               echo "X_GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
+              echo "X_GOOGLE_APPLICATION_CREDENTIALS_AUTH=$GOOGLE_APPLICATION_CREDENTIALS_AUTH_DEV" >> "$GITHUB_ENV"
               echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_DEV" >> "$GITHUB_ENV"
               echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV" >> "$GITHUB_ENV"
               echo "BUCKET_NAME=caisy-assets-dev" >> "$GITHUB_ENV"
@@ -134,12 +137,42 @@ jobs:
               echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_DEV" >> "$GITHUB_ENV"
               echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_DEV" >> "$GITHUB_ENV"
               echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_DEV" >> "$GITHUB_ENV"
+          elif [[ $GITHUB_REF == 'refs/heads/devtwo' || $INPUT_ENV == "devtwo" ]]; then
+              echo "using dev environment"
+              echo "CENV=devtwo" >> "$GITHUB_ENV"
+              echo "EMAIL_ZEPTO_API_KEY=$DEV_EMAIL_ZEPTO_API_KEY" >> "$GITHUB_ENV"
+              echo "DATABASE_URL=$GOOGLE_DATABASE_URL_DEVTWO" >> "$GITHUB_ENV"
+              echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
+              echo "X_GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
+              echo "X_GOOGLE_APPLICATION_CREDENTIALS_AUTH=$GOOGLE_APPLICATION_CREDENTIALS_AUTH_DEVTWO" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_PROD" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_PROD" >> "$GITHUB_ENV"
+              echo "BUCKET_NAME=caisy-assets-devtwo" >> "$GITHUB_ENV"
+              echo "ASSET_SERVE_URL=https://assets.devtwo.caisy.io" >> "$GITHUB_ENV"
+              echo "ASSETS_BASE_PATH=https://assets.devtwo.caisy.io/assets" >> "$GITHUB_ENV"
+              echo "CORE_URL=https://devtwo.caisy.io" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_DEV" >> "$GITHUB_ENV"
+              echo "IMAGE_PREFIX=gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_DEV" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_DEV" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_DEV" >> "$GITHUB_ENV"
           else
               echo "branch not target of the deployment: $GITHUB_REF"
           fi
 
       - id: "auth-dev"
         if: ${{ env.CENV == 'dev' }}
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.gcp_credentials_dev }}"
+
+      - id: "auth-devtwo"
+        if: ${{ env.CENV == 'devtwo' }}
         uses: "google-github-actions/auth@v0"
         with:
           credentials_json: "${{ secrets.gcp_credentials_dev }}"
@@ -194,6 +227,13 @@ jobs:
         uses: "google-github-actions/get-gke-credentials@v1"
         with:
           cluster_name: caisy-${{ env.CENV }}
+          location: europe-west3
+
+      - id: "get-credentials-devtwo"
+        if: ${{ env.CENV == 'devtwo'}}
+        uses: "google-github-actions/get-gke-credentials@v1"
+        with:
+          cluster_name: caisy-devtwo
           location: europe-west3
 
       - id: "get-credentials-prod-or-staging"
