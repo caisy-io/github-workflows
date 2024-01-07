@@ -237,7 +237,7 @@ jobs:
           location: europe-west3
 
       - id: "get-credentials-prod-or-staging"
-        if: ${{ env.CENV != 'dev'}}
+        if: ${{ env.CENV == 'prod' || env.CENV == 'staging' }}
         uses: "google-github-actions/get-gke-credentials@v1"
         with:
           cluster_name: caisy-${{ env.CENV }}
