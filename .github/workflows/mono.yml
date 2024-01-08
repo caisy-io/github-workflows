@@ -346,6 +346,7 @@ jobs:
           echo "input env: $INPUT_ENV"
           if [[ $GITHUB_REF == 'refs/heads/prod' || $INPUT_ENV == "prod" ]]; then
               echo "using prod environment"
+              echo "CI_COMMIT_REF_SLUG=prod" >> "$GITHUB_ENV"
               echo "CENV=prod" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$GOOGLE_DATABASE_URL_PROD" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_PROD" >> "$GITHUB_ENV"
@@ -369,6 +370,7 @@ jobs:
               echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_PROD" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/staging' || $INPUT_ENV == "staging" ]]; then
               echo "using staging environment"
+              echo "CI_COMMIT_REF_SLUG=staging" >> "$GITHUB_ENV"
               echo "CENV=staging" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$GOOGLE_DATABASE_URL_STAGING" >> "$GITHUB_ENV"
               echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_STAGING" >> "$GITHUB_ENV"
@@ -392,6 +394,7 @@ jobs:
               echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_STAGING" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/dev' || $INPUT_ENV == "dev" ]]; then
               echo "using dev environment"
+              echo "CI_COMMIT_REF_SLUG=dev" >> "$GITHUB_ENV"
               echo "CENV=dev" >> "$GITHUB_ENV"
               echo "EMAIL_ZEPTO_API_KEY=$DEV_EMAIL_ZEPTO_API_KEY" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$GOOGLE_DATABASE_URL_DEV" >> "$GITHUB_ENV"
@@ -415,6 +418,7 @@ jobs:
               echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_DEV" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/devtwo' || $INPUT_ENV == "devtwo" ]]; then
               echo "using devtwo environment"
+              echo "CI_COMMIT_REF_SLUG=dev" >> "$GITHUB_ENV"
               echo "CENV=devtwo" >> "$GITHUB_ENV"
               echo "EMAIL_ZEPTO_API_KEY=$DEV_EMAIL_ZEPTO_API_KEY" >> "$GITHUB_ENV"
               echo "DATABASE_URL=$GOOGLE_DATABASE_URL_DEVTWO" >> "$GITHUB_ENV"
