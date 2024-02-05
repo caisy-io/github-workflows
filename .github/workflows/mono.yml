@@ -555,9 +555,8 @@ jobs:
           cluster_name: caisy-devtwo
           location: europe-west3
 
-      - id: "get-credentials-devthree"
+      - id: "get-k8s-credentials-devthree"
         if: ${{ env.CENV == 'devthree'}}
-      - name: Set up Kubectl
         uses: azure/k8s-set-context@v1
         with:
           kubeconfig: ${{ secrets.DEVTHREE_KUBECONFIG }}
