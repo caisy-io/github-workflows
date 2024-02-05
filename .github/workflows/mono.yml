@@ -334,6 +334,7 @@ jobs:
           BILLING_STRIPE_KEY_PROD: ${{ secrets.BILLING_STRIPE_KEY_PROD }}
           BILLING_STRIPE_WEBHOOK_SECRET_PROD: ${{ secrets.BILLING_STRIPE_WEBHOOK_SECRET_PROD }}
           BILLING_STRIPE_RETURN_BASE_URL_PROD: ${{ secrets.BILLING_STRIPE_RETURN_BASE_URL_PROD }}
+          DEVTHREE_DATABASE_URL: ${{ secrets.DEVTHREE_DATABASE_URL }}
           INPUT_ENV: ${{ github.event.client_payload.environment }}
         run: |
           echo "TARGET_PLATFORM=GCLOUD" >> "$GITHUB_ENV"
