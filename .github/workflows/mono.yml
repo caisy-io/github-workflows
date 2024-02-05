@@ -422,6 +422,31 @@ jobs:
               echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_DEV" >> "$GITHUB_ENV"
               echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_DEV" >> "$GITHUB_ENV"
               echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_DEV" >> "$GITHUB_ENV"
+          elif [[ $GITHUB_REF == 'refs/heads/devthree' || $INPUT_ENV == "devthree" ]]; then
+              echo "using dev environment"
+              echo "CI_COMMIT_REF_SLUG=dev" >> "$GITHUB_ENV"
+              echo "CENV=devthree" >> "$GITHUB_ENV"
+              echo "EMAIL_ZEPTO_API_KEY=$DEV_EMAIL_ZEPTO_API_KEY" >> "$GITHUB_ENV"
+              echo "DATABASE_URL=$DEVTHREE_DATABASE_URL" >> "$GITHUB_ENV"
+              echo "GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
+              echo "X_GOOGLE_APPLICATION_CREDENTIALS=$GOOGLE_APPLICATION_CREDENTIALS_DEV" >> "$GITHUB_ENV"
+              echo "X_B64_GOOGLE_APPLICATION_CREDENTIALS_AUTH=$X_B64_GOOGLE_APPLICATION_CREDENTIALS_AUTH_DEV" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_APIKEY=$NEXT_PUBLIC_FIRE_APIKEY_DEV" >> "$GITHUB_ENV"
+              echo "NEXT_PUBLIC_FIRE_AUTHDOMAIN=$NEXT_PUBLIC_FIRE_AUTHDOMAIN_DEV" >> "$GITHUB_ENV"
+              echo "BUCKET_NAME=caisy-assets-dev" >> "$GITHUB_ENV"
+              echo "ASSET_SERVE_URL=https://assets.devthree.caisy.io" >> "$GITHUB_ENV"
+              echo "ASSETS_BASE_PATH=https://assets.devthree.caisy.io/assets" >> "$GITHUB_ENV"
+              echo "CORE_URL=https://devthree.caisy.io" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_LOGS_PWD=$GRAFC_LOGS_PWD_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_USER=$GRAFC_TRACE_USER_DEV" >> "$GITHUB_ENV"
+              echo "GRAFC_TRACE_PWD=$GRAFC_TRACE_PWD_DEV" >> "$GITHUB_ENV"
+              echo "IMAGE_PREFIX=gcr.io/caisy-dev/${{ env.CI_PROJECT_NAME }}" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_KEY=$BILLING_STRIPE_KEY_DEV" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_WEBHOOK_SECRET=$BILLING_STRIPE_WEBHOOK_SECRET_DEV" >> "$GITHUB_ENV"
+              echo "BILLING_STRIPE_RETURN_BASE_URL=$BILLING_STRIPE_RETURN_BASE_URL_DEV" >> "$GITHUB_ENV"
           elif [[ $GITHUB_REF == 'refs/heads/devtwo' || $INPUT_ENV == "devtwo" ]]; then
               echo "using devtwo environment"
               echo "CI_COMMIT_REF_SLUG=dev" >> "$GITHUB_ENV"
@@ -461,6 +486,12 @@ jobs:
 
       - id: "auth-devtwo"
         if: ${{ env.CENV == 'devtwo' }}
+        uses: "google-github-actions/auth@v2"
+        with:
+          credentials_json: "${{ secrets.gcp_credentials_dev }}"
+
+      - id: "auth-devthree"
+        if: ${{ env.CENV == 'devthree' }}
         uses: "google-github-actions/auth@v2"
         with:
           credentials_json: "${{ secrets.gcp_credentials_dev }}"
@@ -523,6 +554,13 @@ jobs:
         with:
           cluster_name: caisy-devtwo
           location: europe-west3
+
+      - id: "get-credentials-devthree"
+        if: ${{ env.CENV == 'devthree'}}
+      - name: Set up Kubectl
+        uses: azure/k8s-set-context@v1
+        with:
+          kubeconfig: ${{ secrets.DEVTHREE_KUBECONFIG }}
 
       - id: "get-credentials-prod-or-staging"
         if: ${{ env.CENV == 'prod' || env.CENV == 'staging' }}
