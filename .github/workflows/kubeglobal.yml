@@ -268,11 +268,19 @@ jobs:
           cache-from: type=registry,ref=${{ env.IMAGE_PREFIX }}:latest
           cache-to: type=inline
 
+      - id: "get-k8s-credentials-dev"
+        if: ${{ env.CENV == 'dev'}}
+        uses: azure/k8s-set-context@v1
+        with:
+          kubeconfig: ${{ secrets.DEVTHREE_KUBECONFIG }}
+          
       - id: "get-k8s-credentials-devthree"
         if: ${{ env.CENV == 'devthree'}}
         uses: azure/k8s-set-context@v1
         with:
           kubeconfig: ${{ secrets.DEVTHREE_KUBECONFIG }}
+
+
 
       - id: "get-k8s-credentials-staging"
         if: ${{ env.CENV == 'staging'}}
