@@ -345,20 +345,20 @@ jobs:
           INTERNAL_AUTOMATION_AUTH_TOKEN: ${{ secrets.INTERNAL_AUTOMATION_AUTH_TOKEN }}
           IMAGE: ${{ env.IMAGE_PREFIX }}:${{ github.sha }}
         run: |
-          mkdir -p /tmp/deployment/k8s/${{ inputs.service }} && for filename in deployment/k8s/${{ inputs.service }}/*; do envsubst '${X_B64_GOOGLE_APPLICATION_CREDENTIALS_AUTH} ${STORAGE_BUCKET_CONFIG} ${LUCID_MODE} ${X_GOOGLE_APPLICATION_CREDENTIALS} ${X_GOOGLE_APPLICATION_CREDENTIALS_AUTH} ${EMAIL_ZEPTO_API_KEY} ${BILLING_STRIPE_KEY} ${BILLING_STRIPE_WEBHOOK_SECRET} ${BILLING_STRIPE_RETURN_BASE_URL} ${ASSET_SERVE_URL} ${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${ELASTICSEARCH_PWD} ${ELASTICSEARCH_HOST} ${IMAGE} ${NEXT_PUBLIC_INTERCOM_ID} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${LINEAR_API_KEY} ${INTERNAL_AUTOMATION_AUTH_TOKEN} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/base/${filename}; done &&
+          mkdir -p /tmp/deployment/k8s/${{ inputs.service }} && for filename in deployment/k8s/${{ inputs.service }}/*; do envsubst '${X_B64_GOOGLE_APPLICATION_CREDENTIALS_AUTH} ${STORAGE_BUCKET_CONFIG} ${LUCID_MODE} ${X_GOOGLE_APPLICATION_CREDENTIALS} ${X_GOOGLE_APPLICATION_CREDENTIALS_AUTH} ${EMAIL_ZEPTO_API_KEY} ${BILLING_STRIPE_KEY} ${BILLING_STRIPE_WEBHOOK_SECRET} ${BILLING_STRIPE_RETURN_BASE_URL} ${ASSET_SERVE_URL} ${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${ELASTICSEARCH_PWD} ${ELASTICSEARCH_HOST} ${IMAGE} ${NEXT_PUBLIC_INTERCOM_ID} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${LINEAR_API_KEY} ${INTERNAL_AUTOMATION_AUTH_TOKEN} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename}; done &&
           if [ -d "deployment/overlays" ]; then 
             cp -rf deployment/overlays /tmp/overlays; 
             echo "Copied overlay files"; 
           fi && 
-          ls /tmp/base &&
+          ls /tmp &&
           if [ -d "/tmp/overlays/${CENV}/${{ inputs.service }}" ]; then 
             echo "Applying Kustomize overlay for ${CENV} environment" && 
             ls /tmp/overlays/${CENV}/${{ inputs.service }} &&
             kubectl apply -k /tmp/overlays/${CENV}/${{ inputs.service }}; 
           else 
             echo "No overlay found for ${{ inputs.service }} environment. Applying base configuration." && 
-            for filename in /tmp/base/*; do 
-              cat /tmp/base/${filename} && kubectl apply -f /tmp/base/${filename} && echo "Applied file: /tmp/base/${filename}"; 
+            for filename in deployment/k8s/${{ inputs.service }}/*; do 
+              cat /tmp/${filename} && kubectl apply -f /tmp/${filename} && echo "Applied file: /tmp/${filename}"; 
             done; 
           fi
       - name: Run deploy.sh
