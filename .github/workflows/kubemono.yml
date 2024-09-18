@@ -350,16 +350,16 @@ jobs:
             cp -rf deployment/overlays /tmp/deployment/overlays; 
             echo "Copied overlay files"; 
           fi && 
-          ls /tmp &&
+            echo "/tmp/deployment" && ls /tmp/deployment || true &&
           if [ -d "/tmp/deployment/overlays/${CENV}/${{ inputs.service }}" ]; then 
             echo "Applying Kustomize overlay for ${CENV} environment" && 
             ls /tmp/deployment/overlays/${CENV}/${{ inputs.service }} &&
             kubectl apply -k /tmp/deployment/overlays/${CENV}/${{ inputs.service }}; 
           else 
             echo "No overlay found for ${{ inputs.service }} environment. Applying base configuration." && 
-            ls /tmp/deployment &&
-            ls /tmp/deployment/overlays &&
-            ls /tmp/deployment/overlays/${CENV}/${{ inputs.service }} &&
+            echo "/tmp/deployment" && ls /tmp/deployment || true &&
+            echo "/tmp/deployment/overlays" && ls /tmp/deployment/overlays || true &&
+            echo "/tmp/deployment/overlays/${CENV}/${{ inputs.service }}" && ls /tmp/deployment/overlays/${CENV}/${{ inputs.service }} || true &&
             for filename in deployment/k8s/${{ inputs.service }}/*; do 
               cat /tmp/${filename} && kubectl apply -f /tmp/${filename} && echo "Applied file: /tmp/${filename}"; 
             done; 
