@@ -107,8 +107,8 @@ jobs:
               echo "ASSETS_BASE_PATH=https://assets.caisy.io/assets" >> "$GITHUB_ENV"
               echo "ASSET_SERVE_URL=https://assets.caisy.io" >> "$GITHUB_ENV"
               echo "CORE_URL=https://caisy.io" >> "$GITHUB_ENV"
-              echo "AWS_ACCESS_KEY_ID_PROD=$AWS_ACCESS_KEY_ID" >> "$GITHUB_ENV"
-              echo "AWS_SECRET_ACCESS_KEY_PROD=$AWS_SECRET_ACCESS_KEY" >> "$GITHUB_ENV"
+              echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_PROD" >> "$GITHUB_ENV"
+              echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_PROD" >> "$GITHUB_ENV"
               echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_PROD" >> "$GITHUB_ENV"
               echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_PROD" >> "$GITHUB_ENV"
               echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_PROD" >> "$GITHUB_ENV"
@@ -135,8 +135,8 @@ jobs:
               echo "ASSETS_BASE_PATH=https://assets.staging.caisy.io/assets" >> "$GITHUB_ENV"
               echo "ASSET_SERVE_URL=https://assets.staging.caisy.io" >> "$GITHUB_ENV"
               echo "CORE_URL=https://staging.caisy.io" >> "$GITHUB_ENV"
-              echo "AWS_ACCESS_KEY_ID_STAGING=$AWS_ACCESS_KEY_ID" >> "$GITHUB_ENV"
-              echo "AWS_SECRET_ACCESS_KEY_STAGING=$AWS_SECRET_ACCESS_KEY" >> "$GITHUB_ENV"              
+              echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_STAGING" >> "$GITHUB_ENV"
+              echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_STAGING" >> "$GITHUB_ENV"              
               echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_STAGING" >> "$GITHUB_ENV"
               echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_STAGING" >> "$GITHUB_ENV"
               echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_STAGING" >> "$GITHUB_ENV"
@@ -164,8 +164,8 @@ jobs:
               echo "ASSET_SERVE_URL=https://assets.dev.caisy.io" >> "$GITHUB_ENV"
               echo "ASSETS_BASE_PATH=https://assets.dev.caisy.io/assets" >> "$GITHUB_ENV"
               echo "CORE_URL=https://dev.caisy.io" >> "$GITHUB_ENV"
-              echo "AWS_ACCESS_KEY_ID_DEV=$AWS_ACCESS_KEY_ID" >> "$GITHUB_ENV"
-              echo "AWS_SECRET_ACCESS_KEY_DEV=$AWS_SECRET_ACCESS_KEY" >> "$GITHUB_ENV" 
+              echo "AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID_DEV" >> "$GITHUB_ENV"
+              echo "AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY_DEV" >> "$GITHUB_ENV" 
               echo "GRAFC_PROM_USER=$GRAFC_PROM_USER_DEV" >> "$GITHUB_ENV"
               echo "GRAFC_PROM_PWD=$GRAFC_PROM_PWD_DEV" >> "$GITHUB_ENV"
               echo "GRAFC_LOGS_USER=$GRAFC_LOGS_USER_DEV" >> "$GITHUB_ENV"
@@ -359,7 +359,7 @@ jobs:
           INTERNAL_AUTOMATION_AUTH_TOKEN: ${{ secrets.INTERNAL_AUTOMATION_AUTH_TOKEN }}
           IMAGE: ${{ env.IMAGE_PREFIX }}:${{ github.sha }}
         run: |
-          echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" && mkdir -p /tmp/deployment/k8s/${{ inputs.service }} && for filename in deployment/k8s/${{ inputs.service }}/*; do envsubst '${X_B64_GOOGLE_APPLICATION_CREDENTIALS_AUTH} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} ${STORAGE_BUCKET_CONFIG} ${LUCID_MODE} ${X_GOOGLE_APPLICATION_CREDENTIALS} ${X_GOOGLE_APPLICATION_CREDENTIALS_AUTH} ${EMAIL_ZEPTO_API_KEY} ${BILLING_STRIPE_KEY} ${BILLING_STRIPE_WEBHOOK_SECRET} ${BILLING_STRIPE_RETURN_BASE_URL} ${ASSET_SERVE_URL} ${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${ELASTICSEARCH_PWD} ${ELASTICSEARCH_HOST} ${IMAGE} ${NEXT_PUBLIC_INTERCOM_ID} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${LINEAR_API_KEY} ${INTERNAL_AUTOMATION_AUTH_TOKEN} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename}; done &&
+          mkdir -p /tmp/deployment/k8s/${{ inputs.service }} && for filename in deployment/k8s/${{ inputs.service }}/*; do envsubst '${X_B64_GOOGLE_APPLICATION_CREDENTIALS_AUTH} ${AWS_ACCESS_KEY_ID} ${AWS_SECRET_ACCESS_KEY} ${STORAGE_BUCKET_CONFIG} ${LUCID_MODE} ${X_GOOGLE_APPLICATION_CREDENTIALS} ${X_GOOGLE_APPLICATION_CREDENTIALS_AUTH} ${EMAIL_ZEPTO_API_KEY} ${BILLING_STRIPE_KEY} ${BILLING_STRIPE_WEBHOOK_SECRET} ${BILLING_STRIPE_RETURN_BASE_URL} ${ASSET_SERVE_URL} ${GRAFC_PROM_USER} ${GRAFC_PROM_PWD} ${GRAFC_LOGS_USER} ${GRAFC_LOGS_PWD} ${GRAFC_TRACE_USER} ${GRAFC_TRACE_PWD} ${ELASTICSEARCH_PWD} ${ELASTICSEARCH_HOST} ${IMAGE} ${NEXT_PUBLIC_INTERCOM_ID} ${NEXT_PUBLIC_FIRE_APIKEY} ${NEXT_PUBLIC_FIRE_AUTHDOMAIN} ${CORE_URL} ${ASSETS_BASE_PATH} ${BUCKET_NAME} ${GOOGLE_APPLICATION_CREDENTIALS} ${SENDGRID_API_KEY} ${DATABASE_URL} ${LINEAR_API_KEY} ${INTERNAL_AUTOMATION_AUTH_TOKEN} ${CI_PROJECT_NAME} ${CENV}' <./${filename} > /tmp/${filename}; done &&
           if [ -d "deployment/overlays" ]; then 
             cp -rf deployment/overlays /tmp/deployment/overlays; 
             echo "Copied overlay files"; 
